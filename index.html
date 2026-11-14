@@ -88,9 +88,12 @@
   .btn.warn{background:#f59e0b;color:#451a03}
   .btn.ghost{background:#1e293b;color:var(--text);border:1px solid var(--line)}
   .btn:active{transform:translateY(1px)}
-  .levels{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:14px}
-  .lv{appearance:none;display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;border-radius:14px;
-    border:1px solid var(--line);background:#1e293b;color:var(--text);font:inherit;font-size:16px;cursor:pointer}
+  .card{max-height:calc(100dvh - 32px);overflow-y:auto}
+  .levels{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+  .lv{appearance:none;display:flex;align-items:center;gap:10px;text-align:left;padding:10px;border-radius:14px;min-width:0;
+    border:1px solid var(--line);background:#1e293b;color:var(--text);font:inherit;font-size:14.5px;line-height:1.25;cursor:pointer}
+  .lv > span:last-child{min-width:0}
+  .lv .n{flex:none}
   .lv .n{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:900;background:#334155}
   .lv.done .n{background:#22c55e;color:#052e16}
   .lv.cur{border-color:var(--amber)}
@@ -184,7 +187,61 @@ const LEVEL_DEFS = [
       ".. NE NW S4 NS+EW Xw",
       ".. .. .. Bn Rn .."],
     switches:{ S1:{states:["EW","SW"], init:0}, S2:{states:["NS","NE"], init:0},
-               S3:{states:["EW","SW"], init:0}, S4:{states:["NS","NE"], init:0} } }
+               S3:{states:["EW","SW"], init:0}, S4:{states:["NS","NE"], init:0} } },
+
+  { name:"Tre tåg",
+    hint:"Nu kommer det gröna tåget! Tre tåg kör samtidigt. Två av dem kan hamna på samma spår – se upp i sammanslagningen.",
+    grid:[
+      "rv .. gv .. bv",
+      "S1 SW S2 SW NS",
+      "NS NS NS NS+ES S3",
+      "NS NS NS NS NS",
+      "Xn Rn Gn Bn Xn"],
+    switches:{ S1:{states:["NS","NE"], init:0}, S2:{states:["NS","NE"], init:1}, S3:{states:["NS","NW"], init:0} } },
+
+  { name:"Labyrinten",
+    hint:"Fem växlar och många återvändsgränder. En växel som tåget passerar från sidan måste också ligga rätt – annars spårar det ur.",
+    grid:[
+      "r> EW S1 EW S2 Xw",
+      ".. .. NS .. NS ..",
+      ".. .. S3 EW S4 ..",
+      ".. .. NS .. NS ..",
+      ".. .. NS .. S5 SW",
+      ".. .. Xn .. Bn Rn"],
+    switches:{ S1:{states:["EW","SW"], init:0}, S2:{states:["EW","SW"], init:0}, S3:{states:["NS","NE"], init:0},
+               S4:{states:["NS","SW"], init:1}, S5:{states:["NS","NE"], init:0} } },
+
+  { name:"Dubbelkorsningen",
+    hint:"Två korsningar och två omvägar. Räkna stegen: var befinner sig det röda tåget när det blå passerar?",
+    grid:[
+      ".. .. bv .. .. ..",
+      ".. .. S2 SW .. ..",
+      "r> S1 NS+EW NS+EW EW+ES Rw",
+      ".. NS NS+ES NW NS ..",
+      ".. NE NS+EW EW NW ..",
+      ".. .. Bn .. .. .."],
+    switches:{ S1:{states:["EW","SW"], init:0}, S2:{states:["NS","NE"], init:0} } },
+
+  { name:"Rusningstrafik",
+    hint:"Det röda tåget kör rakt fram genom fyra korsningar. Det blå och det gröna måste korsa dess spår vid rätt tidpunkt.",
+    grid:[
+      ".. .. bv .. gv ..",
+      ".. ES S1 SW+ES S2 ..",
+      "r> NS+EW NS+EW NS+EW NS+EW Rw",
+      ".. NE NS+SW NS+ES NW ..",
+      ".. .. Bn Gn .. .."],
+    switches:{ S1:{states:["NS","NE","NW"], init:0}, S2:{states:["NS","NW"], init:1} } },
+
+  { name:"Ställverket",
+    hint:"Finalen: tre tåg och tre växlar. Om det röda tåget tar omvägen kör det på det gröna tågets spår – då måste den växeln ligga rätt för båda.",
+    grid:[
+      ".. .. bv .. gv ..",
+      ".. .. S2 SW NS ..",
+      "r> S1 NS+EW NS+EW ES+EW+NS Rw",
+      ".. NS NS+ES NW S3 SW",
+      ".. NE NS+EW EW NS+NW NS",
+      ".. .. Bn .. Gn Xn"],
+    switches:{ S1:{states:["EW","SW"], init:0}, S2:{states:["NS","NE"], init:0}, S3:{states:["NS","NE"], init:1} } }
 ];
 
 /* ================= Geometri & parsning ================= */
@@ -193,7 +250,8 @@ const SIDE={N:0,E:1,S:2,W:3};
 const opp=d=>(d+2)%4;
 const S=100;
 const COLORS={ r:{main:"#ef4444",dark:"#7f1d1d",light:"#fca5a5",name:"Det röda tåget",st:"den röda stationen"},
-               b:{main:"#3b82f6",dark:"#1e3a8a",light:"#93c5fd",name:"Det blå tåget",st:"den blå stationen"} };
+               b:{main:"#3b82f6",dark:"#1e3a8a",light:"#93c5fd",name:"Det blå tåget",st:"den blå stationen"},
+               g:{main:"#22c55e",dark:"#14532d",light:"#86efac",name:"Det gröna tåget",st:"den gröna stationen"} };
 
 const parsePair=s=>[SIDE[s[0]],SIDE[s[1]]];
 const parseTile=s=>s.split("+").map(parsePair);
@@ -213,11 +271,11 @@ function buildLevel(def){
         cell={type:"switch",id:switches.length,states:d.states.map(parseTile)};
         switches.push({r,c,init:d.init||0,n:d.states.length,label:tok});
       }
-      else if(/^[rb][\^>v<]$/.test(tok)){
+      else if(/^[rbg][\^>v<]$/.test(tok)){
         const dir="^>v<".indexOf(tok[1]);
         cell={type:"start",dir}; trains.push({color:tok[0],r,c,dir});
       }
-      else if(/^[RB][nesw]$/.test(tok)) cell={type:"station",color:tok[0].toLowerCase(),entry:"nesw".indexOf(tok[1])};
+      else if(/^[RBG][nesw]$/.test(tok)) cell={type:"station",color:tok[0].toLowerCase(),entry:"nesw".indexOf(tok[1])};
       else if(/^X[nesw]$/.test(tok)) cell={type:"dead",open:"nesw".indexOf(tok[1])};
       else cell={type:"track",pairs:parseTile(tok)};
       cells[r][c]=cell;
@@ -320,7 +378,7 @@ function step(L,sw,trains){
     } else if(A.r===B.r&&A.c===B.c){
       A.status=B.status="crashed";
       const [x,y]=center(A.r,A.c);
-      fails.unshift({title:"Krock!",msg:"Det röda och det blå tåget kom till samma ruta samtidigt och krockade. Prova att låta ett av tågen ta en annan väg.",at:{x,y}});
+      fails.unshift({title:"Krock!",msg:`${COLORS[A.color].name} och ${COLORS[B.color].name.toLowerCase()} kom till samma ruta samtidigt och krockade. Prova att låta ett av tågen ta en annan väg.`,at:{x,y}});
     }
   }
   return {next,moves,fails,arrivals};
@@ -344,7 +402,7 @@ function solve(L){
   }
   return {combos:total,solutions:sols,initialFails:!simulate(L,L.switches.map(s=>s.init)).ok};
 }
-window.TV={LEVELS,solve,simulate};
+window.TV={LEVELS,solve,simulate,buildLevel};
 
 /* ================= Ljud (Web Audio) ================= */
 let ac=null;
@@ -384,7 +442,8 @@ const buzz=ms=>{ try{ if(!save.muted&&navigator.vibrate) navigator.vibrate(ms); 
 const KEY="tagvaxeln.v1";
 let save={unlocked:1,current:0,muted:false};
 try{ Object.assign(save,JSON.parse(localStorage.getItem(KEY)||"{}")); }catch(e){}
-save.unlocked=Math.max(1,Math.min(LEVELS.length,save.unlocked|0));
+// Nya banor låses upp för den som redan klarat tidigare sista banan
+save.unlocked=Math.max(1,Math.min(LEVELS.length,Math.max(save.unlocked|0,(save.completed|0)+1)));
 save.current=Math.max(0,Math.min(save.unlocked-1,save.current|0));
 function persist(){ try{ localStorage.setItem(KEY,JSON.stringify(save)); }catch(e){} }
 
