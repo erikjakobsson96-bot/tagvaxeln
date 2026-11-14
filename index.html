@@ -241,7 +241,58 @@ const LEVEL_DEFS = [
       ".. NS NS+ES NW S3 SW",
       ".. NE NS+EW EW NS+NW NS",
       ".. .. Bn .. Gn Xn"],
-    switches:{ S1:{states:["EW","SW"], init:0}, S2:{states:["NS","NE"], init:0}, S3:{states:["NS","NE"], init:1} } }
+    switches:{ S1:{states:["EW","SW"], init:0}, S2:{states:["NS","NE"], init:0}, S3:{states:["NS","NE"], init:1} } },
+
+  /* ---- Banor 11–20: genererade och kontrollerade med lösaren (exakt en lösning var) ---- */
+  { name:"Bangården",
+    hint:"Två tåg och fyra växlar. Det finns fler stationer än tåg – följ varje tåg ruta för ruta.",
+    grid:["ES EW S1 r< .. ..","S2 SE+WE WE+NS WS+ES SW ..","NS b^ NS NE WE+SN WS","NS .. NE Bw EN S3","S4 Xw .. .. .. Bn","NE Rw .. .. .. .."],
+    switches:{"S1":{"states":["EW","ES"],"init":0},"S2":{"states":["NE","NS"],"init":0},"S3":{"states":["NS","NW"],"init":1},"S4":{"states":["NE","NS"],"init":0}} },
+
+  { name:"Dubbelspåret",
+    hint:"Fem växlar. Nästan varje fel kombination slutar i en krock – räkna stegen där spåren möts.",
+    grid:[".. b> S1 WE S2 WS","r> WE WE+NS WS NS+ES S3",".. .. NS NS+ES NW+EW S4",".. Xe NW NS Be S5",".. .. .. NS+ES EW NW",".. Re EW NW .. .."],
+    switches:{"S1":{"states":["WE","WS"],"init":1},"S2":{"states":["WE","WS"],"init":1},"S3":{"states":["NS","NW"],"init":1},"S4":{"states":["NS","NW"],"init":0},"S5":{"states":["NS","NW"],"init":1}} },
+
+  { name:"Tre i takt",
+    hint:"Tre tåg och fyra växlar på ett litet bräde. Där spåren går ihop får bara ett tåg komma i taget.",
+    grid:["ES SW .. Be EW SW","NS S1 WE SE+WE WE+SE WN+SN","NS r^ .. SN S2 S3","S4 Rw .. SN SN NS","NE WE Xw b^ SN Gn",".. .. .. .. g^ .."],
+    switches:{"S1":{"states":["SE","SN"],"init":0},"S2":{"states":["SN","SE"],"init":0},"S3":{"states":["WN","WS"],"init":0},"S4":{"states":["NE","NS"],"init":1}} },
+
+  { name:"Knutpunkten",
+    hint:"Tre tåg, fem växlar och en extra station som lockbete.",
+    grid:["SE WE WE S1 Rw ..","S2 WE WS NE Gw ..","S3 WE NS+WE WS r> WS","g^ b> WE+NE WS+NS ES NW","ES EW EW+SW S4 NS+WE WS","Bn Re S5 EW NW+EW NW"],
+    switches:{"S1":{"states":["WE","WS"],"init":0},"S2":{"states":["SE","SN"],"init":1},"S3":{"states":["SE","SN"],"init":1},"S4":{"states":["NE","NW"],"init":0},"S5":{"states":["EW","EN"],"init":1}} },
+
+  { name:"Spindelnätet",
+    hint:"Ett högre bräde med tre tåg, fem växlar och fyra stationer. Alla stationer är inte till för det tåg du tror.",
+    grid:["ES S1 ES+WS EW r< ..","NS b^ NS .. ES g<","NS+ES EW S2 WS NS ..","S3 WE WS S4 NS+WS Rs","Bn .. NS S5 WE+NS WN",".. .. ES+NS NW NE WS",".. .. Gn Ge EW NW"],
+    switches:{"S1":{"states":["SW","SE"],"init":1},"S2":{"states":["NE","NW"],"init":1},"S3":{"states":["NE","NS"],"init":1},"S4":{"states":["NE","NS"],"init":0},"S5":{"states":["NE","NS"],"init":1}} },
+
+  { name:"Myllret",
+    hint:"Sex växlar. Börja med det tåg som har minst att välja på och lös resten därifrån.",
+    grid:["ES S1 S2 WS SE WS","NS g^ NE WE+NS WN NS","ES+NS r< .. NS .. NS","S3 ES+WS S4 EW+NW b< NS","NS NS SE+NE WS Rs Gn","NS NE+SE WN+SN NE WE+SN Bw","NE S5 S6 WE WN .."],
+    switches:{"S1":{"states":["SE","SW"],"init":0},"S2":{"states":["WS","WE"],"init":1},"S3":{"states":["NS","NE"],"init":0},"S4":{"states":["ES","EW"],"init":1},"S5":{"states":["WN","WE"],"init":0},"S6":{"states":["WE","WN"],"init":0}} },
+
+  { name:"Nervkittlaren",
+    hint:"Sju växlar ger 128 möjliga kombinationer – bara en av dem fungerar.",
+    grid:[".. g> S1 S2 S3 WS","SE WS NS+ES EW+NW EW+NS S4","SN SE+NE WE+NS WS+ES NW NS","S5 EW+SN EW+NS EW+NS SW Gn","NS b^ Xn NS SN+EN SW","S6 WS .. NS S7 WN","Rn NE Xw Bn EN r<"],
+    switches:{"S1":{"states":["WE","WS"],"init":1},"S2":{"states":["WE","WS"],"init":0},"S3":{"states":["WE","WS"],"init":1},"S4":{"states":["NW","NS"],"init":0},"S5":{"states":["EN","ES"],"init":1},"S6":{"states":["NS","NE"],"init":0},"S7":{"states":["SN","SE"],"init":0}} },
+
+  { name:"Lila linjen",
+    hint:"Det lila tåget ansluter! Fyra tåg och fem växlar på samma bräde.",
+    grid:["SE S1 WE S2 WS Rs","p^ NE SE+WE WE+NS WE+NS WN+SN",".. .. r^ Pn SE+NE S3","Gs SE WE WS SN NS","EN S4 SW Xn SN NS","ES g< SN b> S5 NS","NE WE WN+EN EW NW Bn"],
+    switches:{"S1":{"states":["WS","WE"],"init":0},"S2":{"states":["WE","WS"],"init":1},"S3":{"states":["WS","WN"],"init":0},"S4":{"states":["EW","EN"],"init":1},"S5":{"states":["WS","WN"],"init":1}} },
+
+  { name:"Rusningstimmen",
+    hint:"Fyra tåg och sex växlar. Var befinner sig varje tåg efter tre steg?",
+    grid:[".. SE WE S1 WE Gw","Be EW+SN SW NS bv ..",".. S2 EN+WN EW+NW S3 WS","g> WN+SN p> WE WS NS",".. S4 EW S5 NE+WE WS+NS","Re NW+SW Ps EN r< NS",".. EN S6 EW EW NW"],
+    switches:{"S1":{"states":["WS","WE"],"init":0},"S2":{"states":["SE","SN"],"init":0},"S3":{"states":["NW","NE"],"init":0},"S4":{"states":["EN","ES"],"init":0},"S5":{"states":["SW","SE"],"init":1},"S6":{"states":["EN","EW"],"init":1}} },
+
+  { name:"Mästarprovet",
+    hint:"Finalen: fyra tåg, sju växlar och exakt en lösning av 128.",
+    grid:["SE Gw Be EW S1 WS","S2 WE SE+WE WE S3 WS+NS","EN+SN EW SN+EW g< SE WS+NS","S4 SW S5 b< SN NS","NS r^ SE+NE WE+SE WN+EN S6","NS p> WN S7 Rw NS","NE WE WE WN .. Pn"],
+    switches:{"S1":{"states":["SW","SE"],"init":0},"S2":{"states":["SE","SN"],"init":1},"S3":{"states":["WN","WE"],"init":1},"S4":{"states":["ES","EN"],"init":0},"S5":{"states":["ES","EN"],"init":1},"S6":{"states":["NS","NW"],"init":1},"S7":{"states":["SE","SN"],"init":1}} }
 ];
 
 /* ================= Geometri & parsning ================= */
@@ -251,7 +302,8 @@ const opp=d=>(d+2)%4;
 const S=100;
 const COLORS={ r:{main:"#ef4444",dark:"#7f1d1d",light:"#fca5a5",name:"Det röda tåget",st:"den röda stationen"},
                b:{main:"#3b82f6",dark:"#1e3a8a",light:"#93c5fd",name:"Det blå tåget",st:"den blå stationen"},
-               g:{main:"#22c55e",dark:"#14532d",light:"#86efac",name:"Det gröna tåget",st:"den gröna stationen"} };
+               g:{main:"#22c55e",dark:"#14532d",light:"#86efac",name:"Det gröna tåget",st:"den gröna stationen"},
+               p:{main:"#a855f7",dark:"#581c87",light:"#d8b4fe",name:"Det lila tåget",st:"den lila stationen"} };
 
 const parsePair=s=>[SIDE[s[0]],SIDE[s[1]]];
 const parseTile=s=>s.split("+").map(parsePair);
@@ -271,11 +323,11 @@ function buildLevel(def){
         cell={type:"switch",id:switches.length,states:d.states.map(parseTile)};
         switches.push({r,c,init:d.init||0,n:d.states.length,label:tok});
       }
-      else if(/^[rbg][\^>v<]$/.test(tok)){
+      else if(/^[rbgp][\^>v<]$/.test(tok)){
         const dir="^>v<".indexOf(tok[1]);
         cell={type:"start",dir}; trains.push({color:tok[0],r,c,dir});
       }
-      else if(/^[RBG][nesw]$/.test(tok)) cell={type:"station",color:tok[0].toLowerCase(),entry:"nesw".indexOf(tok[1])};
+      else if(/^[RBGP][nesw]$/.test(tok)) cell={type:"station",color:tok[0].toLowerCase(),entry:"nesw".indexOf(tok[1])};
       else if(/^X[nesw]$/.test(tok)) cell={type:"dead",open:"nesw".indexOf(tok[1])};
       else cell={type:"track",pairs:parseTile(tok)};
       cells[r][c]=cell;
@@ -456,6 +508,7 @@ let li=0, L=null, sw=[], trains=[], poses=[], phase="plan", stepCount=0, raf=0, 
 function renderBoard(popId){
   const W=L.w*S, H=L.h*S, P=10;
   board.setAttribute("viewBox",`${-P} ${-P} ${W+2*P} ${H+2*P}`);
+  board.style.maxWidth=`min(560px, calc((100dvh - 270px) * ${(W+2*P)/(H+2*P)}))`;
   board.classList.toggle("locked",phase!=="plan"&&phase!=="crashed");
   let bg=`<rect x="${-P}" y="${-P}" width="${W+2*P}" height="${H+2*P}" rx="20" fill="#162032"/>`;
   let sl="",rl="",bd="",gh="",deco="",hits="";
