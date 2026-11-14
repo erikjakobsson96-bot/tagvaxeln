@@ -56,6 +56,13 @@
     animation:spin 1.4s linear infinite;filter:drop-shadow(0 0 5px rgba(251,191,36,.85));
     transform-box:fill-box;transform-origin:center}
   .ring.pop{animation:spin 1.4s linear infinite, pop .28s ease-out}
+  .ring.tg{stroke:#22d3ee;filter:drop-shadow(0 0 5px rgba(34,211,238,.85))}
+  .gh.tg{stroke:#22d3ee}
+  .tgbadge circle{fill:#0e7490;stroke:#67e8f9;stroke-width:2.5}
+  .tgbadge text{fill:#ecfeff;font-size:17px;font-weight:900}
+  .wait{pointer-events:none}
+  .wait circle{fill:#0f172a;stroke:#fbbf24;stroke-width:3.5}
+  .wait text{fill:#fde68a;font-size:20px;font-weight:900}
   .swbg{fill:rgba(251,191,36,.07)}
   .locked .ring{animation:none;opacity:.3;filter:none}
   .hit{fill:transparent;cursor:pointer}
@@ -114,6 +121,7 @@
     <svg id="board" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
       <g id="static"></g>
       <g id="trainsLayer"></g>
+      <g id="badges"></g>
       <g id="fx"></g>
       <g id="hits"></g>
     </svg>
@@ -292,7 +300,65 @@ const LEVEL_DEFS = [
   { name:"Mästarprovet",
     hint:"Finalen: fyra tåg, sju växlar och exakt en lösning av 128.",
     grid:["SE Gw Be EW S1 WS","S2 WE SE+WE WE S3 WS+NS","EN+SN EW SN+EW g< SE WS+NS","S4 SW S5 b< SN NS","NS r^ SE+NE WE+SE WN+EN S6","NS p> WN S7 Rw NS","NE WE WE WN .. Pn"],
-    switches:{"S1":{"states":["SW","SE"],"init":0},"S2":{"states":["SE","SN"],"init":1},"S3":{"states":["WN","WE"],"init":1},"S4":{"states":["ES","EN"],"init":0},"S5":{"states":["ES","EN"],"init":1},"S6":{"states":["NS","NW"],"init":1},"S7":{"states":["SE","SN"],"init":1}} }
+    switches:{"S1":{"states":["SW","SE"],"init":0},"S2":{"states":["SE","SN"],"init":1},"S3":{"states":["WN","WE"],"init":1},"S4":{"states":["ES","EN"],"init":0},"S5":{"states":["ES","EN"],"init":1},"S6":{"states":["NS","NW"],"init":1},"S7":{"states":["SE","SN"],"init":1}} },
+
+  /* ---- Banor 21–30: nya mekaniker – försenad avgång, vippväxlar (⇄) och trevägsväxlar.
+          Genererade och kontrollerade: exakt en lösning, och varje ny mekanik behövs för att lösa banan. ---- */
+  { name:"Vänta lite",
+    hint:"Nytt: siffran över ett tåg visar hur många steg det står still innan det kör. Räkna med väntetiden när du planerar.",
+    grid:[".. .. .. ES SW ..",".. .. Re SW+NW S1 Bw",".. bv SE SN+WE S2 ..",".. NE S3 SN+WE NS+WE Rw",".. .. .. SN+EN NW ..",".. .. .. EN r< .."],
+    switches:{"S1":{"states":["SE","SN"],"init":0},"S2":{"states":["WN","WS"],"init":1},"S3":{"states":["WE","WN"],"init":1}},
+    delays:{"r":3} },
+
+  { name:"Avgångstavlan",
+    hint:"Två tåg har försenad avgång. Följ alla tre tågen steg för steg – var är de när spåren korsas?",
+    grid:["ES EW S1 SW SE Xw","NS+ES S2 EW+NS EW+SN EW+SN r<","Gn S3 WE+NS WE+SN S4 Rw",".. NS NS g^ .. ..","ES EW+NW EW+NW b< Bs ..","NE WE WE WE WN .."],
+    switches:{"S1":{"states":["EW","ES"],"init":1},"S2":{"states":["EW","ES"],"init":1},"S3":{"states":["NS","NE"],"init":1},"S4":{"states":["WE","WN"],"init":1}},
+    delays:{"r":2,"b":2} },
+
+  { name:"Vippväxeln",
+    hint:"Nytt: en turkos växel med ⇄ slår om av sig själv varje gång ett tåg har kört igenom den. Nästa tåg som kommer dit åker åt andra hållet!",
+    grid:[".. .. .. rv .. ..",".. .. .. S1 WS ..",".. .. SE NS+WS NS ..","Rs .. EN+SN NS+EW SW+NW Bs","SN .. SN S2 SN+WE WN","EN EW S3 NW b^ .."],
+    switches:{"S1":{"states":["NS","NE"],"init":0},"S2":{"states":["NE","NS"],"init":0,"toggle":true},"S3":{"states":["EN","EW"],"init":1}} },
+
+  { name:"Turordning",
+    hint:"Två tåg delar spår och en vippväxel skiljer dem åt igen. Vilket tåg kommer först – och åt vilket håll ska växeln stå då?",
+    grid:[".. Re SW .. .. ..",".. ES S1 g> WS ..",".. NE SN+WE SE+WE NE+WE WS",".. r> S2 WN ES NW",".. .. Gs b> WE+NE WS","ES EW EW+SN EW SW+EW S3","Bn .. EN EW S4 NW"],
+    switches:{"S1":{"states":["SW","SN"],"init":0},"S2":{"states":["WE","WN"],"init":0},"S3":{"states":["NW","NS"],"init":1},"S4":{"states":["EW","EN"],"init":0,"toggle":true}} },
+
+  { name:"Trevägsväxeln",
+    hint:"Nytt: en växel med tre lägen. Tryck flera gånger för att bläddra mellan dem. 48 kombinationer – en fungerar.",
+    grid:["ES EW SW .. .. .. ..","S1 Bw S2 EW b< .. ..","NS .. ES+NS r< .. .. ..","NS SE NS+WE WE+SE WE+SE Gw ..","NS SN S3 WN+SN EN SW ..","Xn SN NE+SE S4 S5 WN ..",".. g^ EN NW Rn .. .."],
+    switches:{"S1":{"states":["NS","NE"],"init":1},"S2":{"states":["ES","EN"],"init":0},"S3":{"states":["NE","NS"],"init":1},"S4":{"states":["WE","WN","WS"],"init":2},"S5":{"states":["WE","WS"],"init":1}} },
+
+  { name:"Klockan tickar",
+    hint:"En vippväxel och ett försenat tåg på samma bana. Både ordningen och tidpunkten avgör.",
+    grid:[".. .. .. Be S1 ES+WS SW",".. .. .. Xe SN+EW S2 r^",".. .. .. Re EW+SN NS+EW SW",".. .. .. SE SN+WN SE+NE S3",".. .. .. S4 WE+SN WN+EN S5",".. .. g> WN b^ .. NS",".. .. .. .. .. Ge NW"],
+    switches:{"S1":{"states":["SW","SE"],"init":1},"S2":{"states":["NS","NW"],"init":0},"S3":{"states":["WN","WS"],"init":1,"toggle":true},"S4":{"states":["SE","SN"],"init":1},"S5":{"states":["NW","NS"],"init":1}},
+    delays:{"g":3} },
+
+  { name:"Fyra i takt",
+    hint:"Fyra tåg och en vippväxel. Tänk på i vilken ordning tågen passerar den.",
+    grid:[".. .. .. .. pv ES r<","ES EW SW ES NW NS+ES SW","S1 Pw SN NS+ES SW S2 WN","NS .. S3 NW+SW SN NS ..","NE SE+WE WE+NS S4 SN+WN Rn Gs",".. b^ NS SE S5 WE WN",".. Be NW EN g< .. .."],
+    switches:{"S1":{"states":["NE","NS"],"init":0},"S2":{"states":["NS","NE"],"init":1},"S3":{"states":["EN","ES"],"init":1,"toggle":true},"S4":{"states":["WN","WE"],"init":0},"S5":{"states":["WN","WE"],"init":0}} },
+
+  { name:"Tidtabellen",
+    hint:"Sex växlar, en vippväxel och två försenade tåg. 64 kombinationer och nästan alla fel slutar i krock.",
+    grid:["Rs ES SW .. ES EW SW","EN EW+NS S1 EW+SW S2 .. SN","bv Pn ES S3 NE WS r^","NS+ES EW NW S4 WS NS ..","NE WS p> S5 NS+WE WS+NS ..","Gs NE+SE Bw .. NS+ES NW ..","EN S6 EW EW EW+NW g< .."],
+    switches:{"S1":{"states":["EW","EN"],"init":1,"toggle":true},"S2":{"states":["NS","NW"],"init":0},"S3":{"states":["SW","SN"],"init":1},"S4":{"states":["SN","SE"],"init":1},"S5":{"states":["WE","WN"],"init":0},"S6":{"states":["EN","EW"],"init":0}},
+    delays:{"g":1,"r":3} },
+
+  { name:"Dubbelvippen",
+    hint:"Två vippväxlar på ett högt bräde. Lägg dem så att varje tåg som passerar åker rätt – även det som kommer efter.",
+    grid:["Ge EW EW SW ES SW ..","bv .. pv S1 WE+NS WE+SN WS","NE WS NS SN+EN S2 g^ Pn","ES NW S3 S4 NS+WS .. ..","NE WS+ES EW+NW SW+EW NW .. ..","ES S5 r> WN .. .. ..","NE NS+WE Rw Bs .. .. ..",".. NE WE S6 WE Xw .."],
+    switches:{"S1":{"states":["SE","SN"],"init":0,"toggle":true},"S2":{"states":["NW","NS"],"init":1},"S3":{"states":["NE","NS"],"init":1},"S4":{"states":["WN","WE"],"init":0},"S5":{"states":["NW","NS"],"init":0,"toggle":true},"S6":{"states":["WN","WE"],"init":0}},
+    delays:{"b":2} },
+
+  { name:"Stormästaren",
+    hint:"Finalen: fyra tåg, två vippväxlar, två trevägsväxlar och två försenade tåg. 288 kombinationer – bara en fungerar.",
+    grid:[".. Xs Ge SW Bs ES SW","SE WE+SN WE SN+WN SN NS SN","S1 S2 EW SN+EW S3 NW+SW r^","NS .. .. SN Xe S4 WS","Rn pv SE S5 bv SN NS","Pe NS+EW S6 NS NE+SE S7 NS+WS",".. NE SN+WN NE EN+WN NW Pn",".. .. g^ .. .. .. .."],
+    switches:{"S1":{"states":["ES","EN"],"init":1},"S2":{"states":["EN","EW"],"init":1},"S3":{"states":["EN","EW"],"init":1,"toggle":true},"S4":{"states":["SN","SE","SW"],"init":1},"S5":{"states":["WS","WN"],"init":1},"S6":{"states":["SN","SW"],"init":0,"toggle":true},"S7":{"states":["WE","WS","WN"],"init":1}},
+    delays:{"p":2,"b":3} }
 ];
 
 /* ================= Geometri & parsning ================= */
@@ -320,12 +386,13 @@ function buildLevel(def){
       if(tok==="..") cell={type:"empty"};
       else if(/^S\d$/.test(tok)){
         const d=def.switches[tok];
-        cell={type:"switch",id:switches.length,states:d.states.map(parseTile)};
-        switches.push({r,c,init:d.init||0,n:d.states.length,label:tok});
+        cell={type:"switch",id:switches.length,states:d.states.map(parseTile),toggle:!!d.toggle};
+        switches.push({r,c,init:d.init||0,n:d.states.length,label:tok,toggle:!!d.toggle});
       }
       else if(/^[rbgp][\^>v<]$/.test(tok)){
         const dir="^>v<".indexOf(tok[1]);
-        cell={type:"start",dir}; trains.push({color:tok[0],r,c,dir});
+        const delay=(def.delays&&def.delays[tok[0]])||0;
+        cell={type:"start",dir}; trains.push({color:tok[0],r,c,dir,delay});
       }
       else if(/^[RBGP][nesw]$/.test(tok)) cell={type:"station",color:tok[0].toLowerCase(),entry:"nesw".indexOf(tok[1])};
       else if(/^X[nesw]$/.test(tok)) cell={type:"dead",open:"nesw".indexOf(tok[1])};
@@ -369,15 +436,17 @@ function cellPairs(L,sw,cell){
   return [];
 }
 function initialTrains(L){
-  return L.trains.map(t=>({color:t.color,r:t.r,c:t.c,entry:opp(t.dir),exit:t.dir,status:"moving"}));
+  return L.trains.map(t=>({color:t.color,r:t.r,c:t.c,entry:opp(t.dir),exit:t.dir,status:"moving",wait:t.delay||0}));
 }
+/* Ett steg för alla tåg. Ändrar inte sw; vippväxlar som passerats returneras i flips. */
 function step(L,sw,trains){
   const next=trains.map(t=>({...t}));
   const moves=trains.map(()=>null);
   const moved=trains.map(()=>false);
-  const fails=[], arrivals=[];
+  const fails=[], arrivals=[], flips=[];
   trains.forEach((t,i)=>{
     if(t.status!=="moving") return;
+    if(t.wait>0){ next[i].wait=t.wait-1; return; }   // försenad avgång
     const seg1={r:t.r,c:t.c,a:t.entry,b:t.exit,t0:.5,t1:1};
     const edge=poseAt(t.r,t.c,t.entry,t.exit,1);
     const nr=t.r+DR[t.exit], nc=t.c+DC[t.exit], ent=opp(t.exit);
@@ -416,6 +485,7 @@ function step(L,sw,trains){
     const ex=p[0]===ent?p[1]:p[0];
     moves[i]=[seg1,{r:nr,c:nc,a:ent,b:ex,t0:0,t1:.5}]; moved[i]=true;
     Object.assign(next[i],{r:nr,c:nc,entry:ent,exit:ex});
+    if(cell.type==="switch"&&cell.toggle) flips.push(cell.id);
   });
   // Krockar
   for(let a=0;a<next.length;a++) for(let b=a+1;b<next.length;b++){
@@ -433,14 +503,15 @@ function step(L,sw,trains){
       fails.unshift({title:"Krock!",msg:`${COLORS[A.color].name} och ${COLORS[B.color].name.toLowerCase()} kom till samma ruta samtidigt och krockade. Prova att låta ett av tågen ta en annan väg.`,at:{x,y}});
     }
   }
-  return {next,moves,fails,arrivals};
+  return {next,moves,fails,arrivals,flips};
 }
-function simulate(L,sw,maxSteps=120){
-  let trains=initialTrains(L);
+function applyFlips(L,sw,flips){ flips.forEach(id=>{ sw[id]=(sw[id]+1)%L.switches[id].n; }); }
+function simulate(L,sw0,maxSteps=120){
+  let trains=initialTrains(L); const sw=sw0.slice();
   for(let s=1;s<=maxSteps;s++){
     const r=step(L,sw,trains);
     if(r.fails.length) return {ok:false,steps:s,msg:r.fails[0].msg};
-    trains=r.next;
+    trains=r.next; applyFlips(L,sw,r.flips);
     if(trains.every(t=>t.status==="arrived")) return {ok:true,steps:s};
   }
   return {ok:false,steps:maxSteps,msg:"loop"};
@@ -501,12 +572,12 @@ function persist(){ try{ localStorage.setItem(KEY,JSON.stringify(save)); }catch(
 
 /* ================= Rendering ================= */
 const $=id=>document.getElementById(id);
-const board=$("board"), gStatic=$("static"), gTrains=$("trainsLayer"), gFx=$("fx"), gHits=$("hits");
+const board=$("board"), gStatic=$("static"), gTrains=$("trainsLayer"), gFx=$("fx"), gHits=$("hits"), gBadges=$("badges");
 const STEP_MS=500;
-let li=0, L=null, sw=[], trains=[], poses=[], phase="plan", stepCount=0, raf=0, timers=[];
+let li=0, L=null, sw=[], runSw=null, trains=[], poses=[], phase="plan", stepCount=0, raf=0, timers=[];
 
 function renderBoard(popId){
-  const W=L.w*S, H=L.h*S, P=10;
+  const W=L.w*S, H=L.h*S, P=10, SW=runSw||sw;   // under körning visas vippväxlarnas aktuella läge
   board.setAttribute("viewBox",`${-P} ${-P} ${W+2*P} ${H+2*P}`);
   board.style.maxWidth=`min(560px, calc((100dvh - 270px) * ${(W+2*P)/(H+2*P)}))`;
   board.classList.toggle("locked",phase!=="plan"&&phase!=="crashed");
@@ -523,9 +594,11 @@ function renderBoard(popId){
     if(cell.type==="track") cell.pairs.forEach(p=>rail(pairPath(r,c,p[0],p[1])));
     else if(cell.type==="switch"){
       bg+=`<rect class="swbg" x="${c*S+2}" y="${r*S+2}" width="${S-4}" height="${S-4}" rx="12"/>`;
-      cell.states.forEach((st,k)=>{ if(k!==sw[cell.id]) st.forEach(p=>gh+=`<path class="gh" d="${pairPath(r,c,p[0],p[1])}"/>`); });
-      cell.states[sw[cell.id]].forEach(p=>rail(pairPath(r,c,p[0],p[1])));
-      deco+=`<circle class="ring${popId===cell.id?" pop":""}" cx="${cx}" cy="${cy}" r="45"/>`;
+      const tg=cell.toggle?" tg":"";
+      cell.states.forEach((st,k)=>{ if(k!==SW[cell.id]) st.forEach(p=>gh+=`<path class="gh${tg}" d="${pairPath(r,c,p[0],p[1])}"/>`); });
+      cell.states[SW[cell.id]].forEach(p=>rail(pairPath(r,c,p[0],p[1])));
+      deco+=`<circle class="ring${tg}${popId===cell.id?" pop":""}" cx="${cx}" cy="${cy}" r="45"/>`;
+      if(cell.toggle) deco+=`<g class="tgbadge" transform="translate(${cx+33} ${cy-33})"><circle r="14"/><text y="6" text-anchor="middle">⇄</text></g>`;
       hits+=`<rect class="hit" data-sw="${cell.id}" x="${c*S}" y="${r*S}" width="${S}" height="${S}"/>`;
     }
     else if(cell.type==="start"){
@@ -539,7 +612,8 @@ function renderBoard(popId){
     else if(cell.type==="station"){
       const d=cell.entry, e=edgePt(r,c,d), col=COLORS[cell.color];
       rail(`M${e[0]} ${e[1]}L${cx} ${cy}`);
-      deco+=`<g class="station" data-st="${r},${c}"><g class="stblock">
+      const arrived=trains.some(t=>t.status==="arrived"&&t.r===r&&t.c===c);
+      deco+=`<g class="station${arrived?" done":""}" data-st="${r},${c}"><g class="stblock">
         <rect x="${cx-33}" y="${cy-33}" width="66" height="66" rx="16" fill="${col.main}" stroke="${col.light}" stroke-width="4"/>
         <rect x="${cx-22}" y="${cy-22}" width="44" height="44" rx="10" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="3" stroke-dasharray="5 5"/>
         <circle cx="${cx}" cy="${cy}" r="9" fill="#fff"/></g></g>`;
@@ -559,13 +633,20 @@ function trainSVG(t){
     <path class="arrow" d="M47 -13 L62 0 L47 13" fill="none" stroke="${c.light}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
   </g></g>`;
 }
-function buildTrains(){ gTrains.innerHTML=trains.map(trainSVG).join(""); drawTrains(); }
+function buildTrains(){
+  gTrains.innerHTML=trains.map(trainSVG).join("");
+  gBadges.innerHTML=trains.map(()=>`<g class="wait"><circle r="17"/><text y="6.5" text-anchor="middle"></text></g>`).join("");
+  drawTrains();
+}
 function drawTrains(){
-  const els=gTrains.children;
+  const els=gTrains.children, bs=gBadges.children;
   poses.forEach((p,i)=>{
     const el=els[i]; if(!el||!p) return;
     el.setAttribute("transform",`translate(${p.x.toFixed(2)} ${p.y.toFixed(2)}) rotate(${(p.ang*180/Math.PI).toFixed(2)})`);
     el.querySelector(".arrow").style.display=phase==="plan"?"":"none";
+    const b=bs[i], w=trains[i]&&trains[i].status==="moving"?trains[i].wait:0;
+    if(b){ b.style.display=w>0?"":"none";
+      if(w>0){ b.setAttribute("transform",`translate(${p.x.toFixed(1)} ${(p.y-36).toFixed(1)})`); b.lastChild.textContent=w; } }
   });
 }
 function poseAlong(segs,p){
@@ -591,7 +672,7 @@ function loadLevel(i){
 }
 function resetTrains(){
   clearTimers(); closeModal();
-  trains=initialTrains(L); phase="plan"; gFx.innerHTML="";
+  trains=initialTrains(L); phase="plan"; runSw=null; gFx.innerHTML="";
   poses=trains.map(t=>poseAt(t.r,t.c,t.entry,t.exit,.5));
   renderBoard(); buildTrains(); updateUI();
 }
@@ -603,13 +684,13 @@ function updateUI(){
   else { go.textContent="■ STOPPA / ÅTERSTÄLL"; go.classList.add("stop"); }
 }
 function run(){
-  actx(); phase="running"; stepCount=0; SFX.start();
+  actx(); phase="running"; stepCount=0; runSw=sw.slice(); SFX.start();
   renderBoard(); updateUI(); drawTrains();
   later(tick,300);
 }
 function tick(){
   if(phase!=="running") return;
-  const res=step(L,sw,trains); stepCount++; SFX.chug();
+  const res=step(L,runSw,trains); stepCount++; SFX.chug();
   const from=poses.slice(), t0=performance.now();
   const frame=now=>{
     if(phase!=="running") return;
@@ -618,6 +699,7 @@ function tick(){
     drawTrains();
     if(p<1){ raf=requestAnimationFrame(frame); return; }
     trains=res.next;
+    if(res.flips.length&&!res.fails.length){ applyFlips(L,runSw,res.flips); renderBoard(); tone(1100,.05,"square",.04); }
     res.arrivals.forEach(i=>{
       const el=gStatic.querySelector(`[data-st="${trains[i].r},${trains[i].c}"]`);
       if(el) el.classList.add("done"); SFX.arrive();
