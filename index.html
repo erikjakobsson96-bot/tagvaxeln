@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1e293b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Tågväxeln</title>
+<style>
+  :root{
+    --bg:#1e293b; --panel:#0f172a; --cell:#273449; --line:#334155;
+    --text:#e2e8f0; --muted:#94a3b8; --amber:#fbbf24;
+    color-scheme:dark;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;
+    overscroll-behavior:none;touch-action:manipulation}
+  #app{display:flex;flex-direction:column;height:100%;max-width:640px;margin:0 auto;
+    padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  header{display:flex;align-items:center;gap:8px;padding:12px 16px 6px}
+  .brand{white-space:nowrap;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:auto;line-height:1.1}
+  .brand b{display:block;color:var(--text);font-size:18px;letter-spacing:.02em;text-transform:none}
+  .hbtn{appearance:none;border:1px solid var(--line);background:#253247;color:var(--text);
+    border-radius:12px;height:42px;padding:0 12px;font:inherit;font-size:15px;font-weight:700;
+    display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}
+  .hbtn:active{transform:translateY(1px);background:#2c3a52}
+  .hbtn.icon{width:42px;padding:0;justify-content:center;font-size:18px}
+  main{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 12px;gap:12px}
+  #board{display:block;width:100%;max-width:min(560px, calc(100dvh - 270px));height:auto;touch-action:manipulation}
+  .info{text-align:center;max-width:470px;padding:0 6px;min-height:4.2em}
+  .info h2{margin:0 0 4px;font-size:17px}
+  .info p{margin:0;font-size:14.5px;line-height:1.4;color:var(--muted)}
+  footer{padding:8px 16px 18px}
+  #go{appearance:none;width:100%;height:66px;border:0;border-radius:18px;cursor:pointer;
+    font:inherit;font-size:20px;font-weight:900;letter-spacing:.07em;color:#052e16;
+    background:linear-gradient(#4ade80,#22c55e);box-shadow:0 6px 0 #15803d,0 12px 26px rgba(0,0,0,.35);
+    transition:transform .06s, box-shadow .06s}
+  #go:active{transform:translateY(4px);box-shadow:0 2px 0 #15803d,0 6px 14px rgba(0,0,0,.35)}
+  #go.stop{color:#451a03;background:linear-gradient(#fcd34d,#f59e0b);box-shadow:0 6px 0 #b45309,0 12px 26px rgba(0,0,0,.35)}
+  #go.stop:active{box-shadow:0 2px 0 #b45309,0 6px 14px rgba(0,0,0,.35)}
+
+  /* SVG */
+  .sl{fill:none;stroke:#55647b;stroke-width:40;stroke-dasharray:7 11}
+  .rl{fill:none;stroke:#e2e8f0;stroke-width:26}
+  .bd{fill:none;stroke:var(--cell);stroke-width:14}
+  .gh{fill:none;stroke:var(--amber);stroke-width:5;stroke-dasharray:3 9;stroke-linecap:round;opacity:.55}
+  .ring{fill:none;stroke:var(--amber);stroke-width:4;stroke-dasharray:11 7;
+    animation:spin 1.4s linear infinite;filter:drop-shadow(0 0 5px rgba(251,191,36,.85));
+    transform-box:fill-box;transform-origin:center}
+  .ring.pop{animation:spin 1.4s linear infinite, pop .28s ease-out}
+  .swbg{fill:rgba(251,191,36,.07)}
+  .locked .ring{animation:none;opacity:.3;filter:none}
+  .hit{fill:transparent;cursor:pointer}
+  .locked .hit{cursor:default}
+  @keyframes spin{to{stroke-dashoffset:-36}}
+  @keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.13)}100%{transform:scale(1)}}
+  .train{pointer-events:none;filter:drop-shadow(0 4px 4px rgba(0,0,0,.55))}
+  .arrow{animation:blink 1s ease-in-out infinite}
+  @keyframes blink{50%{opacity:.25}}
+  .stblock{transition:filter .3s}
+  .station.done .stblock{filter:drop-shadow(0 0 10px #fff)}
+  .boom{transform-box:fill-box;transform-origin:center;animation:boom .6s ease-out forwards}
+  @keyframes boom{0%{transform:scale(.2);opacity:1}100%{transform:scale(1.6);opacity:0}}
+  .boomtxt{animation:shake .5s ease-in-out}
+  @keyframes shake{20%{transform:translateX(-3px)}40%{transform:translateX(3px)}60%{transform:translateX(-2px)}80%{transform:translateX(2px)}}
+
+  /* Modaler */
+  .backdrop{position:fixed;inset:0;background:rgba(2,6,23,.55);display:flex;align-items:flex-end;justify-content:center;
+    padding:16px;z-index:10;opacity:0;pointer-events:none;transition:opacity .2s}
+  .backdrop.show{opacity:1;pointer-events:auto}
+  .card{width:100%;max-width:440px;background:var(--panel);border:1px solid var(--line);border-radius:22px;
+    padding:22px 20px 18px;margin-bottom:env(safe-area-inset-bottom);box-shadow:0 20px 50px rgba(0,0,0,.5);
+    transform:translateY(30px);transition:transform .25s ease-out}
+  .backdrop.show .card{transform:none}
+  .card h3{margin:0 0 8px;font-size:22px}
+  .card p{margin:0 0 18px;color:#cbd5e1;font-size:16px;line-height:1.45}
+  .card .row{display:flex;gap:10px}
+  .btn{appearance:none;flex:1;height:56px;border:0;border-radius:14px;font:inherit;font-size:17px;font-weight:800;cursor:pointer}
+  .btn.primary{background:#22c55e;color:#052e16}
+  .btn.warn{background:#f59e0b;color:#451a03}
+  .btn.ghost{background:#1e293b;color:var(--text);border:1px solid var(--line)}
+  .btn:active{transform:translateY(1px)}
+  .levels{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:14px}
+  .lv{appearance:none;display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;border-radius:14px;
+    border:1px solid var(--line);background:#1e293b;color:var(--text);font:inherit;font-size:16px;cursor:pointer}
+  .lv .n{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:900;background:#334155}
+  .lv.done .n{background:#22c55e;color:#052e16}
+  .lv.cur{border-color:var(--amber)}
+  .lv[disabled]{opacity:.4;cursor:default}
+  .lv small{display:block;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">Switch &amp; Track<b>Tågväxeln</b></div>
+    <button class="hbtn icon" id="installBtn" hidden aria-label="Installera appen" title="Installera appen">⬇</button>
+    <button class="hbtn" id="lvlBtn" aria-label="Välj bana">Bana 1 / 5 ▾</button>
+    <button class="hbtn icon" id="muteBtn" aria-label="Ljud av/på">🔊</button>
+    <button class="hbtn icon" id="resetBtn" aria-label="Nollställ banan" title="Nollställ banan">↺</button>
+  </header>
+  <main>
+    <svg id="board" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+      <g id="static"></g>
+      <g id="trainsLayer"></g>
+      <g id="fx"></g>
+      <g id="hits"></g>
+    </svg>
+    <div class="info"><h2 id="lvlName"></h2><p id="hint"></p></div>
+  </main>
+  <footer><button id="go">▶ KÖR TÅGEN</button></footer>
+</div>
+
+<div class="backdrop" id="modal"><div class="card" id="card"></div></div>
+
+<script>
+"use strict";
+/* ================= Banor =================
+   Rutnät: tokens separerade med mellanslag.
+   ..        tom ruta
+   NS, EW    raka spår   NE, ES, SW, NW  kurvor (vilka sidor som förbinds)
+   A+B       flera spår i samma ruta (korsning "NS+EW" eller sammanslagning "NS+SW")
+   S1..S9    växel (lägen i switches)
+   r> bv ... tåg (r=röd, b=blå) + startriktning ^ > v <
+   Rn Bw ... station (R/B) + sida där spåret kommer in (n e s w)
+   Xw ...    stoppbock/återvändsgränd + öppen sida
+*/
+const LEVEL_DEFS = [
+  { name:"Första växeln",
+    hint:"Tryck på den lysande växeln så att spåret svänger ner mot den röda stationen. Tryck sedan på KÖR TÅGEN.",
+    grid:[
+      ".. .. .. .. ..",
+      "r> EW S1 EW Xw",
+      ".. .. NS .. ..",
+      ".. .. NS .. ..",
+      ".. .. Rn .. .."],
+    switches:{ S1:{states:["EW","SW"], init:0} } },
+
+  { name:"Stickspåren",
+    hint:"Tre växlar och flera falska stickspår. Följ spåret med fingret och lägg alla växlar så att det blå tåget når den blå stationen.",
+    grid:[
+      "b> EW S1 EW Xw",
+      ".. .. NS .. Xs",
+      ".. .. S2 EW S3",
+      ".. .. NS .. NS",
+      ".. .. Rn .. Bn"],
+    switches:{ S1:{states:["EW","SW"], init:0}, S2:{states:["NS","NE"], init:0}, S3:{states:["NW","SW"], init:0} } },
+
+  { name:"Två tåg, två sidor",
+    hint:"Båda tågen kör samtidigt. Lägg växlarna så att varje tåg hittar hem till stationen med sin egen färg.",
+    grid:[
+      "rv .. .. .. bv",
+      "S1 SW ES S3 S2",
+      "NS NS NS NS NS",
+      "NS NS NS NS NS",
+      "Xn Rn Xn Bn Xn"],
+    switches:{ S1:{states:["NS","NE"], init:0}, S2:{states:["NS","NW"], init:0}, S3:{states:["EW","ES"], init:0} } },
+
+  { name:"Korsningen",
+    hint:"Tågen startar samtidigt och spåren korsar varandra. Låt det blå tåget ta en väg där det röda tåget redan hunnit förbi.",
+    grid:[
+      ".. .. bv .. ..",
+      ".. ES S1 SW ..",
+      "r> NS+EW NS+EW NS+EW Rw",
+      ".. NE NS+SW+ES NW ..",
+      ".. .. Bn .. .."],
+    switches:{ S1:{states:["NS","NE","NW"], init:0} } },
+
+  { name:"Tankenöten",
+    hint:"Spåren delar upp sig och går ihop igen. Fyra växlar, en korsning, och någon måste ta en omväg för att inte krocka.",
+    grid:[
+      ".. .. .. bv .. ..",
+      ".. .. .. S2 SW ..",
+      ".. .. .. NS+ES NW ..",
+      "r> S1 EW+ES NS+EW S3 Xw",
+      ".. NE NW S4 NS+EW Xw",
+      ".. .. .. Bn Rn .."],
+    switches:{ S1:{states:["EW","SW"], init:0}, S2:{states:["NS","NE"], init:0},
+               S3:{states:["EW","SW"], init:0}, S4:{states:["NS","NE"], init:0} } }
+];
+
+/* ================= Geometri & parsning ================= */
+const DR=[-1,0,1,0], DC=[0,1,0,-1];               // N E S W
+const SIDE={N:0,E:1,S:2,W:3};
+const opp=d=>(d+2)%4;
+const S=100;
+const COLORS={ r:{main:"#ef4444",dark:"#7f1d1d",light:"#fca5a5",name:"Det röda tåget",st:"den röda stationen"},
+               b:{main:"#3b82f6",dark:"#1e3a8a",light:"#93c5fd",name:"Det blå tåget",st:"den blå stationen"} };
+
+const parsePair=s=>[SIDE[s[0]],SIDE[s[1]]];
+const parseTile=s=>s.split("+").map(parsePair);
+
+function buildLevel(def){
+  const rows=def.grid.map(r=>r.trim().split(/\s+/));
+  const h=rows.length, w=rows[0].length;
+  const cells=[], trains=[], switches=[];
+  rows.forEach((row,r)=>{
+    if(row.length!==w) throw new Error(def.name+": rad "+r+" har fel bredd");
+    cells[r]=[];
+    row.forEach((tok,c)=>{
+      let cell;
+      if(tok==="..") cell={type:"empty"};
+      else if(/^S\d$/.test(tok)){
+        const d=def.switches[tok];
+        cell={type:"switch",id:switches.length,states:d.states.map(parseTile)};
+        switches.push({r,c,init:d.init||0,n:d.states.length,label:tok});
+      }
+      else if(/^[rb][\^>v<]$/.test(tok)){
+        const dir="^>v<".indexOf(tok[1]);
+        cell={type:"start",dir}; trains.push({color:tok[0],r,c,dir});
+      }
+      else if(/^[RB][nesw]$/.test(tok)) cell={type:"station",color:tok[0].toLowerCase(),entry:"nesw".indexOf(tok[1])};
+      else if(/^X[nesw]$/.test(tok)) cell={type:"dead",open:"nesw".indexOf(tok[1])};
+      else cell={type:"track",pairs:parseTile(tok)};
+      cells[r][c]=cell;
+    });
+  });
+  return {name:def.name,hint:def.hint,w,h,cells,trains,switches};
+}
+const LEVELS=LEVEL_DEFS.map(buildLevel);
+
+function center(r,c){return [c*S+S/2, r*S+S/2];}
+function edgePt(r,c,d){return [c*S+S/2+DC[d]*S/2, r*S+S/2+DR[d]*S/2];}
+
+/* Position längs ett spår i en ruta: från sida a (t=0) till sida b (t=1) */
+function poseAt(r,c,a,b,t){
+  const p0=edgePt(r,c,a), p1=edgePt(r,c,b);
+  if(opp(a)===b){
+    return {x:p0[0]+(p1[0]-p0[0])*t, y:p0[1]+(p1[1]-p0[1])*t, ang:Math.atan2(p1[1]-p0[1],p1[0]-p0[0])};
+  }
+  const cx=c*S+S/2+(DC[a]+DC[b])*S/2, cy=r*S+S/2+(DR[a]+DR[b])*S/2;
+  const a0=Math.atan2(p0[1]-cy,p0[0]-cx);
+  let da=Math.atan2(p1[1]-cy,p1[0]-cx)-a0;
+  while(da>Math.PI)da-=2*Math.PI; while(da<-Math.PI)da+=2*Math.PI;
+  const an=a0+da*t, R=S/2;
+  return {x:cx+R*Math.cos(an), y:cy+R*Math.sin(an), ang:an+(da>0?Math.PI/2:-Math.PI/2)};
+}
+function pairPath(r,c,a,b){
+  const p0=edgePt(r,c,a), p1=edgePt(r,c,b);
+  if(opp(a)===b) return `M${p0[0]} ${p0[1]}L${p1[0]} ${p1[1]}`;
+  const cx=c*S+S/2+(DC[a]+DC[b])*S/2, cy=r*S+S/2+(DR[a]+DR[b])*S/2;
+  let da=Math.atan2(p1[1]-cy,p1[0]-cx)-Math.atan2(p0[1]-cy,p0[0]-cx);
+  while(da>Math.PI)da-=2*Math.PI; while(da<-Math.PI)da+=2*Math.PI;
+  return `M${p0[0]} ${p0[1]}A${S/2} ${S/2} 0 0 ${da>0?1:0} ${p1[0]} ${p1[1]}`;
+}
+
+/* ================= Spellogik (ren, används även av lösaren) ================= */
+function cellPairs(L,sw,cell){
+  if(cell.type==="track") return cell.pairs;
+  if(cell.type==="switch") return cell.states[sw[cell.id]];
+  return [];
+}
+function initialTrains(L){
+  return L.trains.map(t=>({color:t.color,r:t.r,c:t.c,entry:opp(t.dir),exit:t.dir,status:"moving"}));
+}
+function step(L,sw,trains){
+  const next=trains.map(t=>({...t}));
+  const moves=trains.map(()=>null);
+  const moved=trains.map(()=>false);
+  const fails=[], arrivals=[];
+  trains.forEach((t,i)=>{
+    if(t.status!=="moving") return;
+    const seg1={r:t.r,c:t.c,a:t.entry,b:t.exit,t0:.5,t1:1};
+    const edge=poseAt(t.r,t.c,t.entry,t.exit,1);
+    const nr=t.r+DR[t.exit], nc=t.c+DC[t.exit], ent=opp(t.exit);
+    const nm=COLORS[t.color].name;
+    const derail=(msg,title)=>{ moves[i]=[seg1]; fails.push({title:title||"Urspårning!",msg,at:edge}); next[i].status="crashed"; };
+    if(nr<0||nc<0||nr>=L.h||nc>=L.w){ derail(nm+" körde rakt ut över kanten på spelplanen!"); return; }
+    const cell=L.cells[nr][nc];
+    if(cell.type==="empty"){ derail(nm+" spårade ur – spåret tog slut och tåget rullade ut i gruset."); return; }
+    if(cell.type==="dead"||cell.type==="start"){
+      const open=cell.type==="dead"?cell.open:cell.dir;
+      if(open!==ent){ derail(nm+" spårade ur – det fanns inget spår åt det hållet."); return; }
+      const seg2={r:nr,c:nc,a:ent,b:opp(ent),t0:0,t1:.36};
+      moves[i]=[seg1,seg2]; next[i].status="crashed";
+      const p=poseAt(nr,nc,ent,opp(ent),.36);
+      fails.push({title:"Återvändsgränd!",msg:nm+" körde in i en stoppbock. Spåret tog slut här.",at:p});
+      return;
+    }
+    if(cell.type==="station"){
+      if(cell.entry!==ent){ derail(nm+" spårade ur bredvid stationen."); return; }
+      const seg2={r:nr,c:nc,a:ent,b:opp(ent),t0:0,t1:.5};
+      moves[i]=[seg1,seg2]; moved[i]=true;
+      Object.assign(next[i],{r:nr,c:nc,entry:ent,exit:opp(ent)});
+      if(cell.color!==t.color){
+        next[i].status="crashed";
+        fails.push({title:"Fel station!",msg:nm+" kom fram till "+COLORS[cell.color].st+". Varje tåg måste till stationen med samma färg.",at:poseAt(nr,nc,ent,opp(ent),.5),soft:true});
+      } else { next[i].status="arrived"; arrivals.push(i); }
+      return;
+    }
+    const p=cellPairs(L,sw,cell).find(q=>q[0]===ent||q[1]===ent);
+    if(!p){
+      derail(cell.type==="switch"
+        ? nm+" spårade ur i en växel – den var lagd åt fel håll för ett tåg som kom därifrån."
+        : nm+" spårade ur – spåret fortsatte inte åt det hållet.");
+      return;
+    }
+    const ex=p[0]===ent?p[1]:p[0];
+    moves[i]=[seg1,{r:nr,c:nc,a:ent,b:ex,t0:0,t1:.5}]; moved[i]=true;
+    Object.assign(next[i],{r:nr,c:nc,entry:ent,exit:ex});
+  });
+  // Krockar
+  for(let a=0;a<next.length;a++) for(let b=a+1;b<next.length;b++){
+    const A=next[a], B=next[b];
+    if(A.status==="crashed"&&!moved[a]) continue;
+    if(B.status==="crashed"&&!moved[b]) continue;
+    if(moved[a]&&moved[b]&&trains[a].r===B.r&&trains[a].c===B.c&&trains[b].r===A.r&&trains[b].c===A.c){
+      moves[a]=[moves[a][0]]; moves[b]=[moves[b][0]];
+      A.status=B.status="crashed";
+      fails.unshift({title:"Frontalkrock!",msg:"Tågen körde rakt mot varandra på samma spår och krockade.",
+        at:poseAt(trains[a].r,trains[a].c,trains[a].entry,trains[a].exit,1)});
+    } else if(A.r===B.r&&A.c===B.c){
+      A.status=B.status="crashed";
+      const [x,y]=center(A.r,A.c);
+      fails.unshift({title:"Krock!",msg:"Det röda och det blå tåget kom till samma ruta samtidigt och krockade. Prova att låta ett av tågen ta en annan väg.",at:{x,y}});
+    }
+  }
+  return {next,moves,fails,arrivals};
+}
+function simulate(L,sw,maxSteps=120){
+  let trains=initialTrains(L);
+  for(let s=1;s<=maxSteps;s++){
+    const r=step(L,sw,trains);
+    if(r.fails.length) return {ok:false,steps:s,msg:r.fails[0].msg};
+    trains=r.next;
+    if(trains.every(t=>t.status==="arrived")) return {ok:true,steps:s};
+  }
+  return {ok:false,steps:maxSteps,msg:"loop"};
+}
+/* Lösare: testar alla kombinationer av växellägen */
+function solve(L){
+  const n=L.switches.map(s=>s.n), total=n.reduce((a,b)=>a*b,1), sols=[];
+  for(let k=0;k<total;k++){
+    let x=k; const sw=n.map(m=>{const v=x%m; x=Math.floor(x/m); return v;});
+    if(simulate(L,sw).ok) sols.push(sw);
+  }
+  return {combos:total,solutions:sols,initialFails:!simulate(L,L.switches.map(s=>s.init)).ok};
+}
+window.TV={LEVELS,solve,simulate};
+
+/* ================= Ljud (Web Audio) ================= */
+let ac=null;
+function actx(){
+  if(!ac){ const C=window.AudioContext||window.webkitAudioContext; if(!C) return null; ac=new C(); }
+  if(ac.state==="suspended") ac.resume();
+  return ac;
+}
+function tone(f,dur,type,vol,when,slide){
+  const a=actx(); if(!a||save.muted) return;
+  const t=a.currentTime+(when||0), o=a.createOscillator(), g=a.createGain();
+  o.type=type||"sine"; o.frequency.setValueAtTime(f,t);
+  if(slide) o.frequency.exponentialRampToValueAtTime(slide,t+dur);
+  g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(vol,t+.004); g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t+dur+.03);
+}
+function noise(dur,vol,ftype,freq,when){
+  const a=actx(); if(!a||save.muted) return;
+  const t=a.currentTime+(when||0), len=Math.max(1,Math.floor(a.sampleRate*dur));
+  const buf=a.createBuffer(1,len,a.sampleRate), d=buf.getChannelData(0);
+  for(let i=0;i<len;i++) d[i]=(Math.random()*2-1)*(1-i/len);
+  const src=a.createBufferSource(), f=a.createBiquadFilter(), g=a.createGain();
+  src.buffer=buf; f.type=ftype; f.frequency.value=freq; g.gain.value=vol;
+  src.connect(f).connect(g).connect(a.destination); src.start(t);
+}
+const SFX={
+  click(){ noise(.025,.35,"highpass",2500); tone(1500,.035,"square",.05,0,600); tone(260,.07,"sine",.18,.012,110); },
+  chug(){ noise(.07,.12,"bandpass",700); },
+  start(){ tone(392,.16,"square",.045); tone(523,.26,"square",.045,.15); },
+  arrive(){ tone(880,.3,"sine",.13); tone(1318,.45,"sine",.09,.09); },
+  win(){ [523,659,784,1047].forEach((f,i)=>tone(f,.38,"triangle",.15,.12*i)); },
+  crash(){ noise(.8,.6,"lowpass",800); tone(150,.55,"sawtooth",.16,0,38); }
+};
+const buzz=ms=>{ try{ if(!save.muted&&navigator.vibrate) navigator.vibrate(ms); }catch(e){} };
+
+/* ================= Spara framsteg ================= */
+const KEY="tagvaxeln.v1";
+let save={unlocked:1,current:0,muted:false};
+try{ Object.assign(save,JSON.parse(localStorage.getItem(KEY)||"{}")); }catch(e){}
+save.unlocked=Math.max(1,Math.min(LEVELS.length,save.unlocked|0));
+save.current=Math.max(0,Math.min(save.unlocked-1,save.current|0));
+function persist(){ try{ localStorage.setItem(KEY,JSON.stringify(save)); }catch(e){} }
+
+/* ================= Rendering ================= */
+const $=id=>document.getElementById(id);
+const board=$("board"), gStatic=$("static"), gTrains=$("trainsLayer"), gFx=$("fx"), gHits=$("hits");
+const STEP_MS=500;
+let li=0, L=null, sw=[], trains=[], poses=[], phase="plan", stepCount=0, raf=0, timers=[];
+
+function renderBoard(popId){
+  const W=L.w*S, H=L.h*S, P=10;
+  board.setAttribute("viewBox",`${-P} ${-P} ${W+2*P} ${H+2*P}`);
+  board.classList.toggle("locked",phase!=="plan"&&phase!=="crashed");
+  let bg=`<rect x="${-P}" y="${-P}" width="${W+2*P}" height="${H+2*P}" rx="20" fill="#162032"/>`;
+  let sl="",rl="",bd="",gh="",deco="",hits="";
+  const rail=d=>{ sl+=`<path class="sl" d="${d}"/>`; rl+=`<path class="rl" d="${d}"/>`; bd+=`<path class="bd" d="${d}"/>`; };
+  const buffer=(x,y,dir,col)=>{ // tvärgående bom
+    const vert=dir%2===0, w=vert?50:13, h=vert?13:50;
+    deco+=`<rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="4" fill="${col||"#f87171"}" stroke="#1e1b1b" stroke-width="3"/>`;
+  };
+  for(let r=0;r<L.h;r++) for(let c=0;c<L.w;c++){
+    const cell=L.cells[r][c], [cx,cy]=center(r,c);
+    bg+=`<rect x="${c*S+2}" y="${r*S+2}" width="${S-4}" height="${S-4}" rx="12" fill="var(--cell)"/>`;
+    if(cell.type==="track") cell.pairs.forEach(p=>rail(pairPath(r,c,p[0],p[1])));
+    else if(cell.type==="switch"){
+      bg+=`<rect class="swbg" x="${c*S+2}" y="${r*S+2}" width="${S-4}" height="${S-4}" rx="12"/>`;
+      cell.states.forEach((st,k)=>{ if(k!==sw[cell.id]) st.forEach(p=>gh+=`<path class="gh" d="${pairPath(r,c,p[0],p[1])}"/>`); });
+      cell.states[sw[cell.id]].forEach(p=>rail(pairPath(r,c,p[0],p[1])));
+      deco+=`<circle class="ring${popId===cell.id?" pop":""}" cx="${cx}" cy="${cy}" r="45"/>`;
+      hits+=`<rect class="hit" data-sw="${cell.id}" x="${c*S}" y="${r*S}" width="${S}" height="${S}"/>`;
+    }
+    else if(cell.type==="start"){
+      const d=cell.dir, e=edgePt(r,c,d), bx=cx-DC[d]*30, by=cy-DR[d]*30;
+      rail(`M${bx} ${by}L${e[0]} ${e[1]}`); buffer(bx,by,d,"#64748b");
+    }
+    else if(cell.type==="dead"){
+      const d=cell.open, e=edgePt(r,c,d), bx=cx+DC[d]*4, by=cy+DR[d]*4;
+      rail(`M${e[0]} ${e[1]}L${cx-DC[d]*8} ${cy-DR[d]*8}`); buffer(bx,by,d);
+    }
+    else if(cell.type==="station"){
+      const d=cell.entry, e=edgePt(r,c,d), col=COLORS[cell.color];
+      rail(`M${e[0]} ${e[1]}L${cx} ${cy}`);
+      deco+=`<g class="station" data-st="${r},${c}"><g class="stblock">
+        <rect x="${cx-33}" y="${cy-33}" width="66" height="66" rx="16" fill="${col.main}" stroke="${col.light}" stroke-width="4"/>
+        <rect x="${cx-22}" y="${cy-22}" width="44" height="44" rx="10" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="3" stroke-dasharray="5 5"/>
+        <circle cx="${cx}" cy="${cy}" r="9" fill="#fff"/></g></g>`;
+    }
+  }
+  gStatic.innerHTML=bg+sl+rl+bd+gh+deco;
+  gHits.innerHTML=hits;
+}
+
+function trainSVG(t){
+  const c=COLORS[t.color];
+  return `<g class="train"><g>
+    <rect x="-37" y="-20" width="74" height="40" rx="11" fill="${c.main}" stroke="${c.dark}" stroke-width="3.5"/>
+    <rect x="-29" y="-12" width="30" height="24" rx="5" fill="${c.dark}" opacity=".45"/>
+    <rect x="9" y="-15" width="19" height="30" rx="6" fill="rgba(255,255,255,.9)"/>
+    <circle cx="34" cy="-12" r="3.6" fill="#fef08a"/><circle cx="34" cy="12" r="3.6" fill="#fef08a"/>
+    <path class="arrow" d="M47 -13 L62 0 L47 13" fill="none" stroke="${c.light}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  </g></g>`;
+}
+function buildTrains(){ gTrains.innerHTML=trains.map(trainSVG).join(""); drawTrains(); }
+function drawTrains(){
+  const els=gTrains.children;
+  poses.forEach((p,i)=>{
+    const el=els[i]; if(!el||!p) return;
+    el.setAttribute("transform",`translate(${p.x.toFixed(2)} ${p.y.toFixed(2)}) rotate(${(p.ang*180/Math.PI).toFixed(2)})`);
+    el.querySelector(".arrow").style.display=phase==="plan"?"":"none";
+  });
+}
+function poseAlong(segs,p){
+  const total=segs.reduce((s,g)=>s+(g.t1-g.t0),0);
+  let target=p*total;
+  for(const g of segs){
+    const len=g.t1-g.t0;
+    if(target<=len||g===segs[segs.length-1]) return poseAt(g.r,g.c,g.a,g.b,g.t0+Math.min(target,len));
+    target-=len;
+  }
+}
+
+/* ================= Spelflöde ================= */
+function clearTimers(){ cancelAnimationFrame(raf); timers.forEach(clearTimeout); timers=[]; }
+function later(fn,ms){ timers.push(setTimeout(fn,ms)); }
+
+function loadLevel(i){
+  clearTimers(); closeModal();
+  li=i; L=LEVELS[i]; sw=L.switches.map(s=>s.init);
+  save.current=i; persist();
+  $("lvlName").textContent=L.name; $("hint").textContent=L.hint;
+  resetTrains();
+}
+function resetTrains(){
+  clearTimers(); closeModal();
+  trains=initialTrains(L); phase="plan"; gFx.innerHTML="";
+  poses=trains.map(t=>poseAt(t.r,t.c,t.entry,t.exit,.5));
+  renderBoard(); buildTrains(); updateUI();
+}
+function updateUI(){
+  $("lvlBtn").textContent=`Bana ${li+1} / ${LEVELS.length} ▾`;
+  $("muteBtn").textContent=save.muted?"🔇":"🔊";
+  const go=$("go");
+  if(phase==="plan"){ go.textContent="▶ KÖR TÅGEN"; go.classList.remove("stop"); }
+  else { go.textContent="■ STOPPA / ÅTERSTÄLL"; go.classList.add("stop"); }
+}
+function run(){
+  actx(); phase="running"; stepCount=0; SFX.start();
+  renderBoard(); updateUI(); drawTrains();
+  later(tick,300);
+}
+function tick(){
+  if(phase!=="running") return;
+  const res=step(L,sw,trains); stepCount++; SFX.chug();
+  const from=poses.slice(), t0=performance.now();
+  const frame=now=>{
+    if(phase!=="running") return;
+    const p=Math.min(1,(now-t0)/STEP_MS);
+    res.moves.forEach((m,i)=>{ if(m) poses[i]=poseAlong(m,p); else poses[i]=from[i]; });
+    drawTrains();
+    if(p<1){ raf=requestAnimationFrame(frame); return; }
+    trains=res.next;
+    res.arrivals.forEach(i=>{
+      const el=gStatic.querySelector(`[data-st="${trains[i].r},${trains[i].c}"]`);
+      if(el) el.classList.add("done"); SFX.arrive();
+    });
+    if(res.fails.length) return crash(res.fails[0]);
+    if(trains.every(t=>t.status==="arrived")) return win();
+    if(stepCount>=120) return crash({title:"Evig loop",msg:"Tågen verkar köra runt i cirklar utan att komma fram.",at:null});
+    tick();
+  };
+  raf=requestAnimationFrame(frame);
+}
+function crash(f){
+  phase="crashed"; updateUI();
+  if(f.at){
+    gFx.innerHTML=`<g transform="translate(${f.at.x} ${f.at.y})">
+      <circle class="boom" r="38" fill="#f97316"/><circle class="boom" r="24" fill="#fde047" style="animation-delay:.05s"/>
+      <text class="boomtxt" x="0" y="16" text-anchor="middle" font-size="${f.soft?44:52}">${f.soft?"❌":"💥"}</text></g>`;
+  }
+  if(f.soft) tone(220,.35,"square",.08), tone(165,.45,"square",.08,.18); else { SFX.crash(); buzz(220); }
+  later(()=>openModal(`<h3>${f.title}</h3><p>${f.msg}</p>
+    <div class="row"><button class="btn warn" data-act="retry">↻ Försök igen</button></div>
+    <p style="margin:12px 0 0;font-size:13px;color:var(--muted)">Dina växlar ligger kvar som du ställde dem.</p>`),750);
+}
+function win(){
+  phase="won"; updateUI(); SFX.win(); buzz(40);
+  if(save.unlocked<li+2) save.unlocked=Math.min(LEVELS.length,li+2);
+  save.completed=Math.max(save.completed||0,li+1); persist();
+  const last=li===LEVELS.length-1;
+  later(()=>openModal(last
+    ? `<h3>Du klarade alla banor! 🏆</h3><p>Alla tåg kom fram – du är en riktig ställverksmästare.</p>
+       <div class="row"><button class="btn ghost" data-act="levels">Välj bana</button><button class="btn primary" data-act="first">Spela igen</button></div>`
+    : `<h3>Snyggt! 🎉</h3><p>Alla tåg kom fram till rätt station.</p>
+       <div class="row"><button class="btn ghost" data-act="retry">Igen</button><button class="btn primary" data-act="next">Nästa bana →</button></div>`),700);
+}
+
+/* ================= Modaler ================= */
+const modal=$("modal"), card=$("card");
+function openModal(html){ card.innerHTML=html; modal.classList.add("show"); }
+function closeModal(){ modal.classList.remove("show"); }
+function openLevels(){
+  const done=save.completed||0;
+  openModal(`<h3>Välj bana</h3><div class="levels">${LEVELS.map((l,i)=>{
+    const locked=i>=save.unlocked;
+    return `<button class="lv${i<done?" done":""}${i===li?" cur":""}" data-lv="${i}" ${locked?"disabled":""}>
+      <span class="n">${locked?"🔒":(i<done?"✓":i+1)}</span><span>Bana ${i+1}: ${l.name}<small>${l.trains.length} tåg · ${l.switches.length} ${l.switches.length===1?"växel":"växlar"}</small></span></button>`;
+  }).join("")}</div><div class="row"><button class="btn ghost" data-act="close">Stäng</button></div>`);
+}
+card.addEventListener("click",e=>{
+  const lv=e.target.closest("[data-lv]");
+  if(lv&&!lv.disabled){ loadLevel(+lv.dataset.lv); return; }
+  const b=e.target.closest("[data-act]"); if(!b) return;
+  const a=b.dataset.act;
+  if(a==="retry") resetTrains();
+  else if(a==="next") loadLevel(Math.min(li+1,LEVELS.length-1));
+  else if(a==="first") loadLevel(0);
+  else if(a==="levels") openLevels();
+  else if(a==="close") closeModal();
+});
+modal.addEventListener("click",e=>{ if(e.target===modal && phase!=="crashed" && phase!=="won") closeModal(); });
+
+/* ================= Inmatning ================= */
+gHits.addEventListener("click",e=>{
+  const h=e.target.closest("[data-sw]"); if(!h) return;
+  if(phase==="running"||phase==="won") return;
+  if(phase==="crashed") resetTrains();
+  const id=+h.dataset.sw;
+  sw[id]=(sw[id]+1)%L.switches[id].n;
+  SFX.click(); buzz(8);
+  renderBoard(id);
+});
+$("go").addEventListener("click",()=>{ if(phase==="plan") run(); else resetTrains(); });
+$("resetBtn").addEventListener("click",()=>{ sw=L.switches.map(s=>s.init); resetTrains(); SFX.click(); });
+$("lvlBtn").addEventListener("click",()=>{ if(phase==="running") resetTrains(); openLevels(); });
+$("muteBtn").addEventListener("click",()=>{ save.muted=!save.muted; persist(); updateUI(); if(!save.muted) SFX.click(); });
+document.addEventListener("dblclick",e=>e.preventDefault(),{passive:false});
+document.addEventListener("contextmenu",e=>e.preventDefault());
+
+/* ================= App (PWA): installation & offline ================= */
+let installPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); installPrompt=e; $("installBtn").hidden=false; });
+window.addEventListener("appinstalled",()=>{ installPrompt=null; $("installBtn").hidden=true; });
+$("installBtn").addEventListener("click",async()=>{
+  if(!installPrompt) return;
+  installPrompt.prompt();
+  try{ await installPrompt.userChoice; }catch(e){}
+  installPrompt=null; $("installBtn").hidden=true;
+});
+if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+}
+
+loadLevel(save.current);
+</script>
+</body>
+</html>
