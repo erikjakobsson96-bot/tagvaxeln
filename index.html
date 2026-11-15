@@ -19,6 +19,9 @@
   }
   *{box-sizing:border-box}
   [hidden]{display:none!important}
+  body{background-image:radial-gradient(120% 70% at 50% 0%, rgba(96,165,250,.09), transparent 60%)}
+  .puff{fill:rgba(226,232,240,.45);transform-box:fill-box;transform-origin:center;animation:puffup .75s ease-out forwards}
+  @keyframes puffup{to{transform:translateY(-30px) scale(2.6);opacity:0}}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
     font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;
@@ -28,7 +31,7 @@
   header{display:flex;align-items:center;gap:8px;padding:12px 16px 6px}
   .brand{white-space:nowrap;font-weight:800;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-right:auto;line-height:1.1}
   .brand b{display:block;color:var(--text);font-size:18px;letter-spacing:.02em;text-transform:none}
-  .hbtn{appearance:none;border:1px solid var(--line);background:#253247;color:var(--text);
+  .hbtn{appearance:none;border:1px solid var(--line);background:linear-gradient(#2d3b54,#223049);color:var(--text);
     border-radius:12px;height:42px;padding:0 12px;font:inherit;font-size:15px;font-weight:700;
     display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}
   .hbtn:active{transform:translateY(1px);background:#2c3a52}
@@ -358,7 +361,39 @@ const LEVEL_DEFS = [
     hint:"Finalen: fyra tåg, två vippväxlar, två trevägsväxlar och två försenade tåg. 288 kombinationer – bara en fungerar.",
     grid:[".. Xs Ge SW Bs ES SW","SE WE+SN WE SN+WN SN NS SN","S1 S2 EW SN+EW S3 NW+SW r^","NS .. .. SN Xe S4 WS","Rn pv SE S5 bv SN NS","Pe NS+EW S6 NS NE+SE S7 NS+WS",".. NE SN+WN NE EN+WN NW Pn",".. .. g^ .. .. .. .."],
     switches:{"S1":{"states":["ES","EN"],"init":1},"S2":{"states":["EN","EW"],"init":1},"S3":{"states":["EN","EW"],"init":1,"toggle":true},"S4":{"states":["SN","SE","SW"],"init":1},"S5":{"states":["WS","WN"],"init":1},"S6":{"states":["SN","SW"],"init":0,"toggle":true},"S7":{"states":["WE","WS","WN"],"init":1}},
-    delays:{"p":2,"b":3} }
+    delays:{"p":2,"b":3} },
+
+  /* ---- Banor 31–35: utvalda för att vara svåra att gissa sig till – fel kombination
+          avslöjar sig först efter många steg, så rutten måste tänkas igenom i förväg. ---- */
+  { name:"Rangerbangården",
+    hint:"Härifrån räcker det inte att chansa – ett fel visar sig först efter halva rutten. Följ varje tåg hela vägen i huvudet innan du kör.",
+    grid:[".. ES EW S1 EW+SW r< ..","Ge SW+NW g> NS+WE S2 .. Bs","ES S3 EW NS+EW NW SE WN","NE NS+WE SE+WE NE+WE S4 WN Rs","b> WE+NE WN+SN .. S5 WE S6",".. .. EN EW NW .. NS",".. .. .. .. .. Ge NW"],
+    switches:{"S1":{"states":["EW","ES"],"init":1},"S2":{"states":["WN","WS"],"init":0},"S3":{"states":["ES","EN","EW"],"init":2},"S4":{"states":["WS","WE"],"init":0,"toggle":true},"S5":{"states":["NS","NE"],"init":0},"S6":{"states":["WN","WS"],"init":1}},
+    delays:{"r":1} },
+
+  { name:"Nattåget",
+    hint:"Fyra tåg i mörkret, två försenade. Trevägsväxeln längst ner styr nästan allt.",
+    grid:[".. .. ES EW S1 S2 WS","ES SW NS Ge SN+EW NW Pn","NS EN EW+NW r< SN ES g<","SE+NE S3 WS .. SN+EN NS+EW SW","SN Rn NS .. SN+EN S4 S5","SN SE NS+WE Pw SN ES S6","EN S7 NS+WE WS SN Bn NS","b> WN Bn NE EN+WN p< Gn"],
+    switches:{"S1":{"states":["SE","SW"],"init":0},"S2":{"states":["WE","WS"],"init":1},"S3":{"states":["WE","WS"],"init":1,"toggle":true},"S4":{"states":["NE","NW"],"init":1},"S5":{"states":["WN","WS"],"init":0},"S6":{"states":["NS","NW"],"init":0},"S7":{"states":["SN","SE","SW"],"init":2}},
+    delays:{"g":1,"b":1} },
+
+  { name:"Pendeltrafiken",
+    hint:"Två vippväxlar och fyra tåg som delar spår. Den längsta rutten i spelet hittills – felen syns först vid slutstationerna.",
+    grid:[".. .. SE WE WE WE WE WS","ES b< S1 WE WE WE Rw NS","NE WE WN+SN Pe EW EW SW Bn","SE WE S2 SE SE+WE WE+SE S3 ..","S4 SE+WE WE+NE WE+SN WN S5 NS+WE Rw","r^ g^ .. EN S6 EW+SN S7 pv",".. .. Ge EW NW EN EW+NW NW"],
+    switches:{"S1":{"states":["SE","SN"],"init":0,"toggle":true},"S2":{"states":["WS","WN"],"init":1},"S3":{"states":["WN","WS"],"init":1,"toggle":true},"S4":{"states":["SE","SN"],"init":1},"S5":{"states":["SE","SN"],"init":1},"S6":{"states":["EW","ES"],"init":1},"S7":{"states":["NS","NW"],"init":0}},
+    delays:{"g":3} },
+
+  { name:"Storstadsnätet",
+    hint:"Åtta växlar, två trevägs och två vippar på det största brädet hittills. 576 kombinationer – och felen gömmer sig länge.",
+    grid:[".. .. .. .. .. Pe EW SW",".. Re S1 WS b> WE WE+SE S2","Xe SW+EW S3 NE WE ES+WS EW+SN NW",".. EN+SN S4 WS .. NE WE+SN WS",".. EN S5 NS+WE WE ES+WS SN+EW S6",".. gv SN Xn rv NE+SE SN+WN Bn",".. NS S7 Gw NS SN p^ ..",".. NE EN+WN EW S8 WN .. .."],
+    switches:{"S1":{"states":["SW","SE"],"init":0},"S2":{"states":["WN","WS"],"init":0,"toggle":true},"S3":{"states":["SW","SN"],"init":1},"S4":{"states":["SN","SE","SW"],"init":0},"S5":{"states":["SN","SW","SE"],"init":0},"S6":{"states":["NS","NW"],"init":0},"S7":{"states":["SE","SN"],"init":1,"toggle":true},"S8":{"states":["NW","NE"],"init":1}},
+    delays:{"b":2,"g":2} },
+
+  { name:"Legenden",
+    hint:"Det stora slutprovet: 864 kombinationer, tre trevägsväxlar, två vippar och två försenade tåg. Exakt en tidtabell fungerar. Lycka till, ställverksmästare!",
+    grid:["Rs .. SE WS .. .. .. ..","EN S1 S2 NS+WE WS Bs .. ..","g> WN NS SE+NE WE+NE S3 WS bv","Xs rv S4 SN+WE Rw NE NS+WE NS+WS","S5 S6 NS+WE EN+WN S7 EW+SW EW+NS NW","NE WE+NS NS+WS .. NS EN SW+NW ..","Gs NS S8 WE NS+WE Rw SN ..","EN EW+NW NW .. NE Pw p^ .."],
+    switches:{"S1":{"states":["SE","SW"],"init":1},"S2":{"states":["WS","WN","WE"],"init":1},"S3":{"states":["WN","WE","WS"],"init":0},"S4":{"states":["NE","NS"],"init":0},"S5":{"states":["ES","EN"],"init":1},"S6":{"states":["NW","NE","NS"],"init":2},"S7":{"states":["ES","EW"],"init":0,"toggle":true},"S8":{"states":["NS","NE"],"init":1,"toggle":true}},
+    delays:{"g":3,"b":1} }
 ];
 
 /* ================= Geometri & parsning ================= */
@@ -581,7 +616,9 @@ function renderBoard(popId){
   board.setAttribute("viewBox",`${-P} ${-P} ${W+2*P} ${H+2*P}`);
   board.style.maxWidth=`min(560px, calc((100dvh - 270px) * ${(W+2*P)/(H+2*P)}))`;
   board.classList.toggle("locked",phase!=="plan"&&phase!=="crashed");
-  let bg=`<rect x="${-P}" y="${-P}" width="${W+2*P}" height="${H+2*P}" rx="20" fill="#162032"/>`;
+  let bg=`<defs>${Object.entries(COLORS).map(([k,c])=>
+    `<linearGradient id="tg-${k}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c.light}"/><stop offset=".3" stop-color="${c.main}"/><stop offset="1" stop-color="${c.dark}"/></linearGradient>`).join("")}</defs>`
+    +`<rect x="${-P}" y="${-P}" width="${W+2*P}" height="${H+2*P}" rx="20" fill="#162032" stroke="#2e3d55" stroke-width="2"/>`;
   let sl="",rl="",bd="",gh="",deco="",hits="";
   const rail=d=>{ sl+=`<path class="sl" d="${d}"/>`; rl+=`<path class="rl" d="${d}"/>`; bd+=`<path class="bd" d="${d}"/>`; };
   const buffer=(x,y,dir,col)=>{ // tvärgående bom
@@ -590,7 +627,7 @@ function renderBoard(popId){
   };
   for(let r=0;r<L.h;r++) for(let c=0;c<L.w;c++){
     const cell=L.cells[r][c], [cx,cy]=center(r,c);
-    bg+=`<rect x="${c*S+2}" y="${r*S+2}" width="${S-4}" height="${S-4}" rx="12" fill="var(--cell)"/>`;
+    bg+=`<rect x="${c*S+2}" y="${r*S+2}" width="${S-4}" height="${S-4}" rx="12" fill="${(r+c)%2?"#293750":"var(--cell)"}"/>`;
     if(cell.type==="track") cell.pairs.forEach(p=>rail(pairPath(r,c,p[0],p[1])));
     else if(cell.type==="switch"){
       bg+=`<rect class="swbg" x="${c*S+2}" y="${r*S+2}" width="${S-4}" height="${S-4}" rx="12"/>`;
@@ -615,8 +652,9 @@ function renderBoard(popId){
       const arrived=trains.some(t=>t.status==="arrived"&&t.r===r&&t.c===c);
       deco+=`<g class="station${arrived?" done":""}" data-st="${r},${c}"><g class="stblock">
         <rect x="${cx-33}" y="${cy-33}" width="66" height="66" rx="16" fill="${col.main}" stroke="${col.light}" stroke-width="4"/>
-        <rect x="${cx-22}" y="${cy-22}" width="44" height="44" rx="10" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="3" stroke-dasharray="5 5"/>
-        <circle cx="${cx}" cy="${cy}" r="9" fill="#fff"/></g></g>`;
+        <path d="M${cx-17} ${cy+20} L${cx-17} ${cy-6} L${cx} ${cy-20} L${cx+17} ${cy-6} L${cx+17} ${cy+20} Z" fill="#fff" opacity=".93"/>
+        <rect x="${cx-6}" y="${cy+3}" width="12" height="17" rx="3" fill="${col.dark}"/>
+        <circle cx="${cx}" cy="${cy-6}" r="3.4" fill="${col.main}"/></g></g>`;
     }
   }
   gStatic.innerHTML=bg+sl+rl+bd+gh+deco;
@@ -626,12 +664,21 @@ function renderBoard(popId){
 function trainSVG(t){
   const c=COLORS[t.color];
   return `<g class="train"><g>
-    <rect x="-37" y="-20" width="74" height="40" rx="11" fill="${c.main}" stroke="${c.dark}" stroke-width="3.5"/>
-    <rect x="-29" y="-12" width="30" height="24" rx="5" fill="${c.dark}" opacity=".45"/>
-    <rect x="9" y="-15" width="19" height="30" rx="6" fill="rgba(255,255,255,.9)"/>
-    <circle cx="34" cy="-12" r="3.6" fill="#fef08a"/><circle cx="34" cy="12" r="3.6" fill="#fef08a"/>
+    <rect x="-37" y="-20" width="74" height="40" rx="11" fill="url(#tg-${t.color})" stroke="${c.dark}" stroke-width="3.5"/>
+    <rect x="-33" y="-19" width="66" height="11" rx="5.5" fill="rgba(255,255,255,.18)"/>
+    <rect x="-30" y="-13" width="27" height="26" rx="5" fill="${c.dark}" opacity=".55"/>
+    <rect x="-26" y="-9" width="19" height="18" rx="4" fill="#cfe6fb" stroke="${c.dark}" stroke-width="2"/>
+    <rect x="8" y="-15" width="20" height="30" rx="6" fill="#f8fafc" stroke="${c.dark}" stroke-width="2"/>
+    <circle cx="18" cy="-19" r="4.5" fill="${c.dark}"/>
+    <circle cx="34" cy="-12" r="3.6" fill="#fef08a" stroke="#ca8a04" stroke-width="1.4"/>
+    <circle cx="34" cy="12" r="3.6" fill="#fef08a" stroke="#ca8a04" stroke-width="1.4"/>
     <path class="arrow" d="M47 -13 L62 0 L47 13" fill="none" stroke="${c.light}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
   </g></g>`;
+}
+function puff(x,y){
+  const e=document.createElementNS("http://www.w3.org/2000/svg","circle");
+  e.setAttribute("cx",x); e.setAttribute("cy",y-14); e.setAttribute("r",7); e.setAttribute("class","puff");
+  gFx.appendChild(e); later(()=>e.remove(),750);
 }
 function buildTrains(){
   gTrains.innerHTML=trains.map(trainSVG).join("");
@@ -691,6 +738,7 @@ function run(){
 function tick(){
   if(phase!=="running") return;
   const res=step(L,runSw,trains); stepCount++; SFX.chug();
+  trains.forEach((t,i)=>{ if(res.moves[i]&&res.moves[i].length>1&&poses[i]) puff(poses[i].x,poses[i].y); });
   const from=poses.slice(), t0=performance.now();
   const frame=now=>{
     if(phase!=="running") return;
