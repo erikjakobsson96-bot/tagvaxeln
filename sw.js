@@ -1,6 +1,6 @@
 // Tågväxeln – service worker: gör appen spelbar offline.
 // Höj versionen när du ändrar filerna så att telefonen hämtar den nya versionen.
-const CACHE = "tagvaxeln-v5";
+const CACHE = "tagvaxeln-v6";
 const FILES = [
   "./",
   "./index.html",

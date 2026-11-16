@@ -393,7 +393,70 @@ const LEVEL_DEFS = [
     hint:"Det stora slutprovet: 864 kombinationer, tre trevägsväxlar, två vippar och två försenade tåg. Exakt en tidtabell fungerar. Lycka till, ställverksmästare!",
     grid:["Rs .. SE WS .. .. .. ..","EN S1 S2 NS+WE WS Bs .. ..","g> WN NS SE+NE WE+NE S3 WS bv","Xs rv S4 SN+WE Rw NE NS+WE NS+WS","S5 S6 NS+WE EN+WN S7 EW+SW EW+NS NW","NE WE+NS NS+WS .. NS EN SW+NW ..","Gs NS S8 WE NS+WE Rw SN ..","EN EW+NW NW .. NE Pw p^ .."],
     switches:{"S1":{"states":["SE","SW"],"init":1},"S2":{"states":["WS","WN","WE"],"init":1},"S3":{"states":["WN","WE","WS"],"init":0},"S4":{"states":["NE","NS"],"init":0},"S5":{"states":["ES","EN"],"init":1},"S6":{"states":["NW","NE","NS"],"init":2},"S7":{"states":["ES","EW"],"init":0,"toggle":true},"S8":{"states":["NS","NE"],"init":1,"toggle":true}},
-    delays:{"g":3,"b":1} }
+    delays:{"g":3,"b":1} },
+
+  /* ---- Banor 36–45: bräden upp till 9x9, upp till 11 växlar och 3072 kombinationer.
+          Bana 41–45 har fem tåg (orange). Samma urval som tidigare: exakt en lösning,
+          sena fel, och vippväxlar och förseningar behövs. ---- */
+  { name:"Godsbangården",
+    hint:"Nu är brädet 8×8 med åtta växlar, två vippväxlar och två försenade tåg. 256 kombinationer – ta det lugnt och räkna.",
+    grid:[".. bv .. pv .. .. Re SW","SE NS+WE Pw S1 WS+ES SW .. SN","SN NE WS NS+ES NW SN SE S2","S3 S4 NW+EW NW .. S5 SN+WE WS+NS","NS NS .. .. Bs g^ S6 SW+NW","NS NS .. SE S7 WE NS+WS SN","NE WE+NS S8 WN rv Ge NW SN",".. Pn NE WE NE+WE WE WE WN"],
+    switches:{"S1":{"states":["NS","NE"],"init":0},"S2":{"states":["WN","WS"],"init":1},"S3":{"states":["ES","EN"],"init":0},"S4":{"states":["ES","EW"],"init":1,"toggle":true},"S5":{"states":["SE","SN"],"init":0},"S6":{"states":["EN","ES"],"init":1,"toggle":true},"S7":{"states":["WN","WE"],"init":1},"S8":{"states":["WS","WE"],"init":0}},
+    delays:{"r":3,"p":2} },
+
+  { name:"Fjärrtåget",
+    hint:"Nio växlar, varav en trevägsväxel. Alla fyra tåg kör genom samma knutpunkt – ordningen avgör vem som kommer fram.",
+    grid:["Ps .. rv SE WE WE Gw ..","SN SE NE+WE S1 WE WE WS ..","EN S2 EW S3 ES+WS S4 NW+SW pv","ES EW S5 EW+SN NW NE SN+WE NS+WS","S6 Rw Gn g^ .. Bs SN NS","Xn .. bv .. .. EN S7 NS+WS",".. ES S8 WE WS Pe S9 NS",".. NE WE WE WE+NE WE WN+EN NW"],
+    switches:{"S1":{"states":["WN","WE"],"init":1,"toggle":true},"S2":{"states":["EN","EW"],"init":0},"S3":{"states":["SW","SE"],"init":0},"S4":{"states":["ES","EW"],"init":1},"S5":{"states":["EW","ES"],"init":1},"S6":{"states":["NS","NE"],"init":1},"S7":{"states":["SW","SN","SE"],"init":1},"S8":{"states":["NW","NE"],"init":0},"S9":{"states":["SN","SW"],"init":0,"toggle":true}},
+    delays:{"r":3,"p":2} },
+
+  { name:"Knutpunkt Nord",
+    hint:"Bredare bräde, fyra tåg i mitten som alla ska åt olika håll. Det blå och det lila tåget väntar på varsin avgång.",
+    grid:["SE WE WE WE WE+SE WE WS Ps ..","SN ES p< g> WE+SN WS S1 S2 WS","EN+SN NW+EW SW r> S3 NS NE+SE WE+NS WS+NS","S4 S5 S6 ES+WS EW+NS S7 WN+EN NW Rn","EN EW+NS b< S8 WE+NS Bw .. .. ..",".. ES+NS EW NW+EW NW .. .. .. ..",".. S9 WE Xw .. .. .. .. ..",".. Gn .. .. .. .. .. .. .."],
+    switches:{"S1":{"states":["NE","NS"],"init":1,"toggle":true},"S2":{"states":["WS","WE","WN"],"init":2},"S3":{"states":["WS","WN"],"init":0},"S4":{"states":["SE","SN"],"init":1},"S5":{"states":["WS","WE"],"init":0},"S6":{"states":["WE","WN"],"init":1},"S7":{"states":["NW","NE"],"init":1},"S8":{"states":["NS","NE"],"init":0,"toggle":true},"S9":{"states":["NS","NE"],"init":1}},
+    delays:{"b":2,"p":4} },
+
+  { name:"Tio växlar",
+    hint:"Tio växlar och två trevägs: 2304 kombinationer och exakt en tidtabell som fungerar. Tre av tågen är försenade.",
+    grid:["SE WE WE WE WE WE WS+ES SW","EN EW+SW S1 WS+ES EW EW S2 SN","p> WE+SN WN+SN NE Rw ES S3 WN",".. EN S4 WS Xs NS NE Pw",".. rv S5 WE+NS WN Xn .. ..","Bs S6 S7 Pn .. .. .. ..","EN EW+NS EW+NW SW Xs .. gv ..","ES EW+NW b< S8 WE+SN Gw S9 Xw","NE WE WE WN+EN S10 EW NW .."],
+    switches:{"S1":{"states":["SE","SW"],"init":0,"toggle":true},"S2":{"states":["NW","NS"],"init":0},"S3":{"states":["NS","NE","NW"],"init":1},"S4":{"states":["SE","SN","SW"],"init":2},"S5":{"states":["SE","SN"],"init":0},"S6":{"states":["NE","NS"],"init":0},"S7":{"states":["WN","WS"],"init":0},"S8":{"states":["SE","SN"],"init":0,"toggle":true},"S9":{"states":["NS","NE"],"init":0},"S10":{"states":["EW","EN"],"init":0}},
+    delays:{"p":3,"r":2,"g":4} },
+
+  { name:"Det stora nätet",
+    hint:"Det första 9×9-brädet. Tre försenade tåg och många återvändsgränder – fel visar sig först långt in på rutten.",
+    grid:[".. .. .. .. .. .. bv .. ..",".. .. .. .. .. SE NS+WS .. ..",".. .. .. .. .. EN S1 WE Xw",".. .. Be SW .. r> WE+NS S2 WS",".. .. .. EN S3 EW EW+NW NW+SW NS",".. .. .. .. NS Re S4 WN NS",".. Ge S5 ES+WS NS+EW EW SN+EW S6 SW+NW","pv SE WN NS+ES S7 WE S8 SE+NE S9","NE WN Pe S10 WE Gw Xn g^ Xn"],
+    switches:{"S1":{"states":["NS","NE","NW"],"init":1},"S2":{"states":["WE","WS"],"init":0},"S3":{"states":["ES","EW"],"init":0,"toggle":true},"S4":{"states":["SE","SW"],"init":0},"S5":{"states":["SE","SW"],"init":1},"S6":{"states":["ES","EW"],"init":1},"S7":{"states":["NW","NE"],"init":0},"S8":{"states":["WS","WN"],"init":1},"S9":{"states":["WN","WS"],"init":1},"S10":{"states":["NE","NW"],"init":0,"toggle":true}},
+    delays:{"r":2,"b":3,"g":4} },
+
+  { name:"Femte tåget",
+    hint:"Nytt: det orange tåget ansluter – fem tåg på samma bräde. Orange och rött liknar varandra, så kolla stationens färg noga.",
+    grid:["b> WE+SE WE WE WS Xe SW ..","ES S1 S2 EW+SW S3 WE SN+WN ..","NS .. NE SN+WE WE+SE Gw SN ..","NS .. ES S4 S5 EW S6 WS","NS Oe EW+NS EW+SN S7 Re S8 NS","Bn Xs NE SN+WN SE+NE WE WN+EN SW+NW","Ps SN g> WN o^ r> WE WN","EN S9 EW EW EW EW EW p<"],
+    switches:{"S1":{"states":["EN","EW"],"init":1},"S2":{"states":["ES","EW"],"init":0,"toggle":true},"S3":{"states":["NE","NW"],"init":1},"S4":{"states":["SW","SN"],"init":0},"S5":{"states":["ES","EN"],"init":1},"S6":{"states":["SN","SW","SE"],"init":1},"S7":{"states":["NW","NS"],"init":1},"S8":{"states":["SW","SN"],"init":1,"toggle":true},"S9":{"states":["EN","EW"],"init":1}},
+    delays:{"o":2,"b":1} },
+
+  { name:"Gryningståget",
+    hint:"Fem tåg, tio växlar och tre försenade avgångar. Titta på varje tågs väntetid innan du bestämmer vem som ska först.",
+    grid:["ES EW S1 EW+SW EW EW SW+EW S2 WS","Pn SE WE+NS WN .. ES SN+EW S3 Rn",".. b^ NE Bw .. SE+NE S4 SN pv","ES EW EW SW+EW EW S5 EW+NS EW+SN NW","NS Rs .. g^ Xe SW NS SN ..","NE S6 WE+SE S7 WE S8 WE+NE WE+SN Gw",".. ES S9 EW+NS EW SW+EW SW EN SW","Xe EW+NW NW On o> S10 WN r> WN"],
+    switches:{"S1":{"states":["ES","EW"],"init":0,"toggle":true},"S2":{"states":["SE","SW"],"init":0},"S3":{"states":["SN","SW"],"init":0},"S4":{"states":["WN","WS"],"init":1},"S5":{"states":["EW","EN"],"init":0},"S6":{"states":["WN","WE"],"init":0},"S7":{"states":["WS","WE"],"init":0,"toggle":true},"S8":{"states":["WN","WE"],"init":0},"S9":{"states":["ES","EN","EW"],"init":1},"S10":{"states":["WN","WE"],"init":1}},
+    delays:{"r":4,"p":3,"o":2} },
+
+  { name:"Spårlabyrinten",
+    hint:"Tio växlar och en tät labyrint av spår. Röd, orange och blå tåg är försenade – var är alla tåg när de möts?",
+    grid:["ES SW SE Xw .. Bs Rs ..","Gn SN SN b> WS EN EW+SN SW","ES S1 WN .. NE+SE WS S2 WN","Bn S3 Xw .. SN+EN S4 EN+SN SW",".. SN+EN SW SE SN+WN NE WE+SN WN","Oe EW+SN S5 S6 S7 .. S8 r<","ES S9 o> WS S10 Pw NS ..","SE+NE WN SE NS+WE EN+WN SW+EW NW ..","EN g< p^ NE WE WN .. .."],
+    switches:{"S1":{"states":["SN","SW","SE"],"init":0},"S2":{"states":["SN","SE"],"init":0,"toggle":true},"S3":{"states":["SN","SE"],"init":1},"S4":{"states":["NW","NS"],"init":1},"S5":{"states":["EN","EW"],"init":1},"S6":{"states":["EW","EN"],"init":1},"S7":{"states":["SN","SW"],"init":1},"S8":{"states":["EN","ES"],"init":0},"S9":{"states":["SN","SW"],"init":0},"S10":{"states":["SE","SN"],"init":0,"toggle":true}},
+    delays:{"b":4,"r":2,"o":3} },
+
+  { name:"Centralstationen",
+    hint:"Elva växlar och 3072 kombinationer på ett 9×9-bräde. Lila tåget väntar längst – fyra steg – men det är bara en av sakerna du måste hålla reda på.",
+    grid:["r> WE S1 WS SE WE WE WE WS",".. Xe NW NE WN+EN S2 SW Re NW",".. .. SE Pw .. NS SN+EN SW ov",".. ES S3 .. Pe S4 g^ S5 NW",".. NE EN+WN S6 S7 SW+NW .. ES+NS b<",".. .. .. Xn Gn SN+EN S8 S9 WS","ES SW .. .. SE SN+WE NS+WE Xw NS","Xn SN .. ES S10 SN+EW NW .. On","Be S11 EW NW NE EN+WN EW p< .."],
+    switches:{"S1":{"states":["WS","WE"],"init":0},"S2":{"states":["ES","EW"],"init":1},"S3":{"states":["SN","SW"],"init":0},"S4":{"states":["NW","NS"],"init":0},"S5":{"states":["EN","ES"],"init":0},"S6":{"states":["EW","ES"],"init":1},"S7":{"states":["ES","EW"],"init":1,"toggle":true},"S8":{"states":["EW","ES"],"init":0},"S9":{"states":["NE","NW"],"init":0,"toggle":true},"S10":{"states":["EN","EW","ES"],"init":2},"S11":{"states":["EW","EN"],"init":0}},
+    delays:{"g":1,"r":1,"p":4} },
+
+  { name:"Ställverkets mästare",
+    hint:"Det absolut sista slutprovet: fem tåg, elva växlar, fyra försenade avgångar och 3072 kombinationer. Exakt en fungerar. Du har kommit hela vägen!",
+    grid:["ES EW r< .. SE WE Rw .. ..","NS .. ES S1 S2 WS SE WE WS","S3 WS+ES EW+NW SN+EW SW On S4 p< Xn","Gn S5 WE WN SN ES NW .. ..",".. Gn .. Xs g^ S6 Ow Ps ..","ES SW ov EN EW S7 Ps SN Os","S8 SN+WE NS+WS SE WE+SE WE+NE S9 SN SN","NS EN NS+EW SN+EW S10 b< NS SN SN","NE Bw NE WN+EN NW .. NE S11 WN"],
+    switches:{"S1":{"states":["SE","SW"],"init":0},"S2":{"states":["WN","WE"],"init":0},"S3":{"states":["NE","NS"],"init":0},"S4":{"states":["EN","ES"],"init":0},"S5":{"states":["NE","NS"],"init":0,"toggle":true},"S6":{"states":["NE","NS"],"init":1},"S7":{"states":["NW","NS"],"init":1},"S8":{"states":["NS","NE"],"init":1},"S9":{"states":["WN","WS"],"init":1,"toggle":true},"S10":{"states":["ES","EW","EN"],"init":1},"S11":{"states":["WE","WN"],"init":1}},
+    delays:{"p":4,"o":3,"b":1,"r":3} }
 ];
 
 /* ================= Geometri & parsning ================= */
@@ -404,7 +467,8 @@ const S=100;
 const COLORS={ r:{main:"#ef4444",dark:"#7f1d1d",light:"#fca5a5",name:"Det röda tåget",st:"den röda stationen"},
                b:{main:"#3b82f6",dark:"#1e3a8a",light:"#93c5fd",name:"Det blå tåget",st:"den blå stationen"},
                g:{main:"#22c55e",dark:"#14532d",light:"#86efac",name:"Det gröna tåget",st:"den gröna stationen"},
-               p:{main:"#a855f7",dark:"#581c87",light:"#d8b4fe",name:"Det lila tåget",st:"den lila stationen"} };
+               p:{main:"#a855f7",dark:"#581c87",light:"#d8b4fe",name:"Det lila tåget",st:"den lila stationen"},
+               o:{main:"#f97316",dark:"#7c2d12",light:"#fdba74",name:"Det orange tåget",st:"den orange stationen"} };
 
 const parsePair=s=>[SIDE[s[0]],SIDE[s[1]]];
 const parseTile=s=>s.split("+").map(parsePair);
@@ -419,17 +483,17 @@ function buildLevel(def){
     row.forEach((tok,c)=>{
       let cell;
       if(tok==="..") cell={type:"empty"};
-      else if(/^S\d$/.test(tok)){
+      else if(/^S\d+$/.test(tok)){
         const d=def.switches[tok];
         cell={type:"switch",id:switches.length,states:d.states.map(parseTile),toggle:!!d.toggle};
         switches.push({r,c,init:d.init||0,n:d.states.length,label:tok,toggle:!!d.toggle});
       }
-      else if(/^[rbgp][\^>v<]$/.test(tok)){
+      else if(/^[rbgpo][\^>v<]$/.test(tok)){
         const dir="^>v<".indexOf(tok[1]);
         const delay=(def.delays&&def.delays[tok[0]])||0;
         cell={type:"start",dir}; trains.push({color:tok[0],r,c,dir,delay});
       }
-      else if(/^[RBGP][nesw]$/.test(tok)) cell={type:"station",color:tok[0].toLowerCase(),entry:"nesw".indexOf(tok[1])};
+      else if(/^[RBGPO][nesw]$/.test(tok)) cell={type:"station",color:tok[0].toLowerCase(),entry:"nesw".indexOf(tok[1])};
       else if(/^X[nesw]$/.test(tok)) cell={type:"dead",open:"nesw".indexOf(tok[1])};
       else cell={type:"track",pairs:parseTile(tok)};
       cells[r][c]=cell;
