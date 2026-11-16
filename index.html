@@ -857,7 +857,8 @@ function openLevels(){
     const locked=i>=save.unlocked;
     return `<button class="lv${i<done?" done":""}${i===li?" cur":""}" data-lv="${i}" ${locked?"disabled":""}>
       <span class="n">${locked?"🔒":(i<done?"✓":i+1)}</span><span>Bana ${i+1}: ${l.name}<small>${l.trains.length} tåg · ${l.switches.length} ${l.switches.length===1?"växel":"växlar"}</small></span></button>`;
-  }).join("")}</div><div class="row"><button class="btn ghost" data-act="close">Stäng</button></div>`);
+  }).join("")}</div><div class="row"><button class="btn ghost" data-act="close">Stäng</button></div>
+  <p style="margin:12px 0 0;font-size:12px;color:var(--muted);text-align:center">Tågväxeln · version 7 · ${LEVELS.length} banor</p>`);
 }
 card.addEventListener("click",e=>{
   const lv=e.target.closest("[data-lv]");
@@ -900,7 +901,18 @@ $("installBtn").addEventListener("click",async()=>{
   installPrompt=null; $("installBtn").hidden=true;
 });
 if("serviceWorker" in navigator && /^https?:$/.test(location.protocol)){
-  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+  const hadController=!!navigator.serviceWorker.controller;
+  let reloaded=false;
+  // När en ny version har tagit över: ladda om så att den visas direkt (väntar om ett tåg är på väg).
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{
+    if(!hadController||reloaded) return;
+    const go=()=>{ if(reloaded) return; if(phase==="running") return setTimeout(go,1500); reloaded=true; location.reload(); };
+    go();
+  });
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").then(reg=>{
+    reg.update().catch(()=>{});
+    document.addEventListener("visibilitychange",()=>{ if(!document.hidden) reg.update().catch(()=>{}); });
+  }).catch(()=>{}));
 }
 
 loadLevel(save.current);
